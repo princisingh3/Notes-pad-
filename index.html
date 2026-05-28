@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasks Ultra Pro Max</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,sans-serif;
+}
+
+:root{
+--primary:#667eea;
+--secondary:#764ba2;
+--accent:#34c759;
+--danger:#ff3b30;
+--warning:#ff9500;
+--bg:#0d0d1a;
+--surface:#1a1a2e;
+--surface2:#252540;
+--text:#fff;
+--text2:#aaa;
+}
+
+[data-theme="midnight"]{
+--bg:#0d0d1a;
+--surface:#1a1a2e;
+--primary:#667eea;
+}
+
+[data-theme="ocean"]{
+--bg:#071a2d;
+--surface:#102b46;
+--primary:#0ea5e9;
+}
+
+[data-theme="sunset"]{
+--bg:#1a0b0b;
+--surface:#331616;
+--primary:#f43f5e;
+}
+
+[data-theme="forest"]{
+--bg:#091909;
+--surface:#163516;
+--primary:#22c55e;
+}
+
+body{
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+}
+
+.header{
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+padding:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+position:sticky;
+top:0;
+z-index:100;
+}
+
+.header h1{
+font-size:20px;
+}
+
+.header button{
+width:40px;
+height:40px;
+border:none;
+border-radius:10px;
+background:rgba(255,255,255,0.2);
+color:#fff;
+font-size:18px;
+cursor:pointer;
+}
+
+.stats{
+margin:15px;
+background:var(--surface);
+padding:20px;
+border-radius:18px;
+}
+
+.progress-wrap{
+height:10px;
+background:var(--surface2);
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,var(--primary),var(--accent));
+transition:0.4s;
+}
+
+.progress-text{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+font-size:13px;
+color:var(--text2);
+}
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-top:18px;
+}
+
+.stat-box{
+background:var(--surface2);
+padding:15px;
+border-radius:14px;
+text-align:center;
+}
+
+.stat-num{
+font-size:22px;
+font-weight:bold;
+color:var(--primary);
+}
+
+.stat-label{
+font-size:11px;
+color:var(--text2);
+margin-top:5px;
+}
+
+.tabs{
+display:flex;
+gap:10px;
+padding:15px;
+overflow-x:auto;
+}
+
+.tab{
+border:none;
+padding:10px 16px;
+border-radius:25px;
+background:var(--surface2);
+color:var(--text2);
+cursor:pointer;
+font-size:13px;
+}
+
+.tab.active{
+background:var(--primary);
+color:#fff;
+}
+
+.search{
+padding:0 15px 15px;
+}
+
+.search input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:var(--surface);
+color:#fff;
+font-size:14px;
+}
+
+.tasks{
+padding:15px;
+padding-bottom:120px;
+}
+
+.task{
+background:var(--surface);
+padding:16px;
+border-radius:16px;
+display:flex;
+gap:12px;
+margin-bottom:14px;
+animation:fade 0.3s ease;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.task.completed{
+opacity:0.5;
+}
+
+.task.completed .task-text{
+text-decoration:line-through;
+}
+
+.task-check{
+width:22px;
+height:22px;
+accent-color:var(--primary);
+}
+
+.task-content{
+flex:1;
+}
+
+.task-text{
+font-size:15px;
+font-weight:600;
+margin-bottom:8px;
+}
+
+.task-desc{
+font-size:13px;
+color:var(--text2);
+margin-bottom:10px;
+}
+
+.task-meta{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-bottom:10px;
+}
+
+.tag{
+padding:4px 10px;
+border-radius:10px;
+font-size:11px;
+background:var(--surface2);
+color:var(--text2);
+}
+
+.tag-high{
+background:var(--danger);
+color:#fff;
+}
+
+.tag-medium{
+background:var(--warning);
+color:#000;
+}
+
+.tag-low{
+background:var(--accent);
+color:#fff;
+}
+
+.tag-overdue{
+background:var(--danger);
+color:#fff;
+}
+
+.task-actions{
+display:flex;
+gap:8px;
+}
+
+.task-actions button{
+padding:8px 12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:var(--surface2);
+color:#fff;
+font-size:12px;
+}
+
+.btn-del{
+background:var(--danger)!important;
+}
+
+.fab{
+position:fixed;
+bottom:25px;
+right:25px;
+width:60px;
+height:60px;
+border-radius:50%;
+border:none;
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+color:#fff;
+font-size:30px;
+cursor:pointer;
+z-index:1000;
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+z-index:2000;
+}
+
+.modal.active{
+display:block;
+}
+
+.modal-content{
+background:var(--surface);
+min-height:100%;
+padding:20px;
+}
+
+.modal-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.modal-header h2{
+font-size:22px;
+}
+
+.modal-header button{
+background:none;
+border:none;
+color:#fff;
+font-size:28px;
+cursor:pointer;
+}
+
+.form-group{
+margin-bottom:20px;
+}
+
+.form-label{
+display:block;
+font-size:12px;
+margin-bottom:8px;
+color:var(--text2);
+}
+
+.form-input,
+.form-select{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:var(--surface2);
+color:#fff;
+font-size:15px;
+}
+
+textarea{
+resize:none;
+min-height:90px;
+}
+
+.btn{
+width:100%;
+padding:16px;
+border:none;
+border-radius:14px;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+margin-top:10px;
+}
+
+.btn-primary{
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+color:#fff;
+}
+
+.btn-secondary{
+background:var(--surface2);
+color:#fff;
+}
+
+.btn-danger{
+background:var(--danger);
+color:#fff;
+}
+
+.theme-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.theme-opt{
+aspect-ratio:1;
+border-radius:14px;
+cursor:pointer;
+border:3px solid transparent;
+}
+
+.empty{
+text-align:center;
+padding:70px 20px;
+}
+
+.empty .icon{
+font-size:70px;
+}
+
+.empty .text{
+margin-top:10px;
+font-size:16px;
+color:var(--text2);
+}
+
+.toast{
+position:fixed;
+bottom:100px;
+left:50%;
+transform:translateX(-50%);
+background:var(--accent);
+padding:14px 24px;
+border-radius:30px;
+font-weight:600;
+color:#000;
+opacity:0;
+transition:0.3s;
+z-index:3000;
+}
+
+.toast.show{
+opacity:1;
+}
+</style>
+</head>
+
+<body data-theme="midnight">
+
+<div class="header">
+<h1>✅ Tasks Ultra Pro</h1>
+<button onclick="showSettings()">⚙️</button>
+</div>
+
+<div class="stats">
+
+<div class="progress-wrap">
+<div class="progress-fill" id="progressBar"></div>
+</div>
+
+<div class="progress-text">
+<span id="progressText">0 of 0 completed</span>
+<span id="progressPercent">0%</span>
+</div>
+
+<div class="stats-grid">
+
+<div class="stat-box">
+<div class="stat-num" id="totalTasks">0</div>
+<div class="stat-label">Total</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-num" id="todayTasks">0</div>
+<div class="stat-label">Today</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-num" id="overdueTasks">0</div>
+<div class="stat-label">Overdue</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-num" id="streakTasks">0</div>
+<div class="stat-label">Done</div>
+</div>
+
+</div>
+</div>
+
+<div class="tabs">
+<button class="tab active" onclick="switchTab('all',this)">🏠 All</button>
+<button class="tab" onclick="switchTab('pending',this)">⏳ Pending</button>
+<button class="tab" onclick="switchTab('completed',this)">✅ Done</button>
+</div>
+
+<div class="search">
+<input type="text" placeholder="🔍 Search tasks..." onkeyup="searchTasks(this.value)">
+</div>
+
+<div class="tasks" id="tasksContainer"></div>
+
+<button class="fab" onclick="openAddModal()">+</button>
+
+<div class="toast" id="toast">Saved!</div>
+
+<!-- ADD MODAL -->
+
+<div class="modal" id="addModal">
+<div class="modal-content">
+
+<div class="modal-header">
+<h2 id="addTitle">New Task</h2>
+<button onclick="closeAddModal()">✕</button>
+</div>
+
+<div class="form-group">
+<label class="form-label">Task Name</label>
+<input type="text" id="taskName" class="form-input">
+</div>
+
+<div class="form-group">
+<label class="form-label">Description</label>
+<textarea id="taskDesc" class="form-input"></textarea>
+</div>
+
+<div class="form-group">
+<label class="form-label">Category</label>
+
+<select id="taskCategory" class="form-select">
+<option value="personal">👤 Personal</option>
+<option value="work">💼 Work</option>
+<option value="study">📚 Study</option>
+<option value="health">💪 Health</option>
+<option value="shopping">🛒 Shopping</option>
+</select>
+
+</div>
+
+<div class="form-group">
+<label class="form-label">Priority</label>
+
+<select id="taskPriority" class="form-select">
+<option value="low">🟢 Low</option>
+<option value="medium">🟠 Medium</option>
+<option value="high">🔴 High</option>
+</select>
+
+</div>
+
+<div class="form-group">
+<label class="form-label">Due Date</label>
+<input type="date" id="taskDue" class="form-input">
+</div>
+
+<button class="btn btn-primary" onclick="saveTask()">💾 Save Task</button>
+<button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+
+</div>
+</div>
+
+<!-- SETTINGS -->
+
+<div class="modal" id="settingsModal">
+<div class="modal-content">
+
+<div class="modal-header">
+<h2>⚙️ Settings</h2>
+<button onclick="closeSettings()">✕</button>
+</div>
+
+<div class="form-group">
+
+<label class="form-label">Themes</label>
+
+<div class="theme-grid">
+
+<div class="theme-opt" style="background:#667eea" onclick="setTheme('midnight')"></div>
+
+<div class="theme-opt" style="background:#0ea5e9" onclick="setTheme('ocean')"></div>
+
+<div class="theme-opt" style="background:#f43f5e" onclick="setTheme('sunset')"></div>
+
+<div class="theme-opt" style="background:#22c55e" onclick="setTheme('forest')"></div>
+
+</div>
+
+</div>
+
+<button class="btn btn-primary" onclick="exportData()">📤 Export Data</button>
+
+<button class="btn btn-danger" onclick="clearAll()">🗑️ Clear All Tasks</button>
+
+</div>
+</div>
+
+<script>
+
+var tasks = JSON.parse(localStorage.getItem('tasksUltra')) || [];
+
+var currentTab = 'all';
+
+var editIndex = null;
+
+function init(){
+render();
+}
+
+init();
+
+function render(){
+
+var container = document.getElementById('tasksContainer');
+
+var filtered = tasks;
+
+if(currentTab === 'pending'){
+filtered = tasks.filter(t => !t.done);
+}
+
+if(currentTab === 'completed'){
+filtered = tasks.filter(t => t.done);
+}
+
+var completed = tasks.filter(t => t.done).length;
+
+var total = tasks.length;
+
+var percent = total > 0
+? Math.round((completed/total)*100)
+: 0;
+
+document.getElementById('progressBar').style.width = percent + '%';
+
+document.getElementById('progressText').innerText =
+completed + ' of ' + total + ' completed';
+
+document.getElementById('progressPercent').innerText =
+percent + '%';
+
+document.getElementById('totalTasks').innerText = total;
+
+var today = new Date().toISOString().split('T')[0];
+
+document.getElementById('todayTasks').innerText =
+tasks.filter(t => t.due === today).length;
+
+document.getElementById('overdueTasks').innerText =
+tasks.filter(t => !t.done && t.due && t.due < today).length;
+
+document.getElementById('streakTasks').innerText =
+completed;
+
+if(filtered.length === 0){
+
+container.innerHTML = `
+<div class="empty">
+<div class="icon">📝</div>
+<div class="text">
+No tasks yet!<br>
+Tap + to add
+</div>
+</div>
+`;
+
+return;
+}
+
+container.innerHTML = filtered.map(task => {
+
+var idx = tasks.indexOf(task);
+
+var icon = {
+personal:'👤',
+work:'💼',
+study:'📚',
+health:'💪',
+shopping:'🛒'
+}[task.category] || '📌';
+
+var overdue =
+!task.done &&
+task.due &&
+task.due < today;
+
+return `
+
+<div class="task ${task.done ? 'completed' : ''}">
+
+<input
+type="checkbox"
+class="task-check"
+${task.done ? 'checked' : ''}
+onchange="toggle(${idx})"
+>
+
+<div class="task-content">
+
+<div class="task-text">${task.text}</div>
+
+${task.desc
+? `<div class="task-desc">${task.desc}</div>`
+: ''}
+
+<div class="task-meta">
+
+<span class="tag tag-${task.priority}">
+${task.priority}
+</span>
+
+<span class="tag">
+${icon} ${task.category}
+</span>
+
+${task.due
+? `<span class="tag ${overdue ? 'tag-overdue':''}">
+${task.due}
+</span>`
+: ''}
+
+</div>
+
+<div class="task-actions">
+
+<button onclick="editTask(${idx})">
+Edit
+</button>
+
+<button class="btn-del"
+onclick="deleteTask(${idx})">
+Delete
+</button>
+
+</div>
+
+</div>
+</div>
+`;
+
+}).join('');
+}
+
+function openAddModal(){
+
+editIndex = null;
+
+document.getElementById('addTitle').innerText =
+'New Task';
+
+document.getElementById('taskName').value = '';
+
+document.getElementById('taskDesc').value = '';
+
+document.getElementById('taskCategory').value =
+'personal';
+
+document.getElementById('taskPriority').value =
+'low';
+
+document.getElementById('taskDue').value = '';
+
+document.getElementById('addModal')
+.classList.add('active');
+}
+
+function closeAddModal(){
+document.getElementById('addModal')
+.classList.remove('active');
+}
+
+function saveTask(){
+
+var text =
+document.getElementById('taskName')
+.value.trim();
+
+if(!text){
+alert('Enter task name');
+return;
+}
+
+var task = {
+
+text:text,
+
+desc:document.getElementById('taskDesc').value,
+
+category:document.getElementById('taskCategory').value,
+
+priority:document.getElementById('taskPriority').value,
+
+due:document.getElementById('taskDue').value,
+
+done:false
+};
+
+if(editIndex !== null){
+
+task.done = tasks[editIndex].done;
+
+tasks[editIndex] = task;
+
+}else{
+
+tasks.unshift(task);
+}
+
+localStorage.setItem(
+'tasksUltra',
+JSON.stringify(tasks)
+);
+
+render();
+
+closeAddModal();
+
+showToast('Task Saved!');
+}
+
+function toggle(i){
+
+tasks[i].done = !tasks[i].done;
+
+localStorage.setItem(
+'tasksUltra',
+JSON.stringify(tasks)
+);
+
+render();
+}
+
+function editTask(i){
+
+editIndex = i;
+
+var t = tasks[i];
+
+document.getElementById('addTitle').innerText =
+'Edit Task';
+
+document.getElementById('taskName').value =
+t.text;
+
+document.getElementById('taskDesc').value =
+t.desc || '';
+
+document.getElementById('taskCategory').value =
+t.category;
+
+document.getElementById('taskPriority').value =
+t.priority;
+
+document.getElementById('taskDue').value =
+t.due || '';
+
+document.getElementById('addModal')
+.classList.add('active');
+}
+
+function deleteTask(i){
+
+if(confirm('Delete this task?')){
+
+tasks.splice(i,1);
+
+localStorage.setItem(
+'tasksUltra',
+JSON.stringify(tasks)
+);
+
+render();
+
+showToast('Task Deleted!');
+}
+}
+
+function switchTab(tab,el){
+
+currentTab = tab;
+
+document.querySelectorAll('.tab')
+.forEach(btn => {
+btn.classList.remove('active');
+});
+
+el.classList.add('active');
+
+render();
+}
+
+function searchTasks(query){
+
+query = query.toLowerCase();
+
+var filtered = tasks.filter(task =>
+
+task.text.toLowerCase().includes(query)
+
+||
+
+(task.desc &&
+task.desc.toLowerCase().includes(query))
+
+);
+
+var container =
+document.getElementById('tasksContainer');
+
+if(filtered.length === 0){
+
+container.innerHTML = `
+<div class="empty">
+<div class="icon">🔍</div>
+<div class="text">No matching tasks</div>
+</div>
+`;
+
+return;
+}
+
+var today =
+new Date().toISOString().split('T')[0];
+
+container.innerHTML = filtered.map(task => {
+
+var idx = tasks.indexOf(task);
+
+var icon = {
+personal:'👤',
+work:'💼',
+study:'📚',
+health:'💪',
+shopping:'🛒'
+}[task.category] || '📌';
+
+return `
+<div class="task ${task.done ? 'completed':''}">
+
+<input type="checkbox"
+class="task-check"
+${task.done ? 'checked':''}
+onchange="toggle(${idx})">
+
+<div class="task-content">
+
+<div class="task-text">
+${task.text}
+</div>
+
+${task.desc
+? `<div class="task-desc">${task.desc}</div>`
+: ''}
+
+<div class="task-meta">
+
+<span class="tag tag-${task.priority}">
+${task.priority}
+</span>
+
+<span class="tag">
+${icon} ${task.category}
+</span>
+
+${task.due
+? `<span class="tag">
+${task.due}
+</span>`
+: ''}
+
+</div>
+
+<div class="task-actions">
+
+<button onclick="editTask(${idx})">
+Edit
+</button>
+
+<button class="btn-del"
+onclick="deleteTask(${idx})">
+Delete
+</button>
+
+</div>
+
+</div>
+</div>
+`;
+
+}).join('');
+}
+
+function showToast(msg){
+
+var toast =
+document.getElementById('toast');
+
+toast.innerText = msg;
+
+toast.classList.add('show');
+
+setTimeout(() => {
+toast.classList.remove('show');
+},2000);
+}
+
+function showSettings(){
+
+document.getElementById('settingsModal')
+.classList.add('active');
+}
+
+function closeSettings(){
+
+document.getElementById('settingsModal')
+.classList.remove('active');
+}
+
+function setTheme(theme){
+
+document.body.setAttribute(
+'data-theme',
+theme
+);
+
+localStorage.setItem(
+'tasksTheme',
+theme
+);
+
+showToast('Theme Changed!');
+}
+
+function exportData(){
+
+var data =
+"data:text/json;charset=utf-8," +
+encodeURIComponent(
+JSON.stringify(tasks,null,2)
+);
+
+var a =
+document.createElement('a');
+
+a.href = data;
+
+a.download = 'tasks-ultra-backup.json';
+
+a.click();
+
+showToast('Exported!');
+}
+
+function clearAll(){
+
+if(confirm('Delete all tasks?')){
+
+tasks = [];
+
+localStorage.removeItem('tasksUltra');
+
+render();
+
+showToast('All Cleared!');
+}
+}
+
+window.onload = function(){
+
+var savedTheme =
+localStorage.getItem('tasksTheme');
+
+if(savedTheme){
+
+document.body.setAttribute(
+'data-theme',
+savedTheme
+);
+}
+
+render();
+};
+
+</script>
+
+</body>
+</html>
