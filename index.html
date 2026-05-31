@@ -80,6 +80,11 @@ background:rgba(255,255,255,0.2);
 color:#fff;
 font-size:18px;
 cursor:pointer;
+transition:0.2s;
+}
+
+.header button:hover{
+background:rgba(255,255,255,0.3);
 }
 
 .stats{
@@ -152,6 +157,11 @@ background:var(--surface2);
 color:var(--text2);
 cursor:pointer;
 font-size:13px;
+transition:0.2s;
+}
+
+.tab:hover{
+opacity:0.8;
 }
 
 .tab.active{
@@ -171,6 +181,10 @@ border-radius:14px;
 background:var(--surface);
 color:#fff;
 font-size:14px;
+}
+
+.search input::placeholder{
+color:var(--text2);
 }
 
 .tasks{
@@ -307,6 +321,7 @@ height:100%;
 background:rgba(0,0,0,0.9);
 display:none;
 z-index:2000;
+overflow-y:auto;
 }
 
 .modal.active{
@@ -444,7 +459,7 @@ opacity:1;
 
 <div class="header">
 <h1>✅ Tasks Ultra Pro</h1>
-<button onclick="showSettings()">⚙️</button>
+<button onclick="showSettings()" title="Settings" aria-label="Open settings">⚙️</button>
 </div>
 
 <div class="stats">
@@ -490,12 +505,12 @@ opacity:1;
 </div>
 
 <div class="search">
-<input type="text" placeholder="🔍 Search tasks..." onkeyup="searchTasks(this.value)">
+<input type="text" placeholder="🔍 Search tasks..." onkeyup="searchTasks(this.value)" aria-label="Search tasks">
 </div>
 
 <div class="tasks" id="tasksContainer"></div>
 
-<button class="fab" onclick="openAddModal()">+</button>
+<button class="fab" onclick="openAddModal()" title="Add new task" aria-label="Add new task">+</button>
 
 <div class="toast" id="toast">Saved!</div>
 
@@ -506,12 +521,12 @@ opacity:1;
 
 <div class="modal-header">
 <h2 id="addTitle">New Task</h2>
-<button onclick="closeAddModal()">✕</button>
+<button onclick="closeAddModal()" aria-label="Close modal">✕</button>
 </div>
 
 <div class="form-group">
 <label class="form-label">Task Name</label>
-<input type="text" id="taskName" class="form-input">
+<input type="text" id="taskName" class="form-input" required>
 </div>
 
 <div class="form-group">
@@ -561,7 +576,7 @@ opacity:1;
 
 <div class="modal-header">
 <h2>⚙️ Settings</h2>
-<button onclick="closeSettings()">✕</button>
+<button onclick="closeSettings()" aria-label="Close settings">✕</button>
 </div>
 
 <div class="form-group">
@@ -591,489 +606,283 @@ opacity:1;
 
 <script>
 
+// ===== STEP 1: DATA & STATE MANAGEMENT =====
 var tasks = JSON.parse(localStorage.getItem('tasksUltra')) || [];
-
 var currentTab = 'all';
-
 var editIndex = null;
 
+// ===== STEP 2: CATEGORY ICONS (REMOVE DUPLICATE CODE) =====
+const CATEGORY_ICONS = {
+  personal: '👤',
+  work: '💼',
+  study: '📚',
+  health: '💪',
+  shopping: '🛒'
+};
+
+// ===== STEP 3: HELPER FUNCTION - RENDER TASK HTML =====
+function renderTaskHTML(task, idx, today){
+  const icon = CATEGORY_ICONS[task.category] || '📌';
+  const overdue = !task.done && task.due && task.due < today;
+  
+  return `
+    <div class="task ${task.done ? 'completed' : ''}">
+      <input
+        type="checkbox"
+        class="task-check"
+        ${task.done ? 'checked' : ''}
+        onchange="toggle(${idx})"
+      >
+      <div class="task-content">
+        <div class="task-text">${task.text}</div>
+        ${task.desc ? `<div class="task-desc">${task.desc}</div>` : ''}
+        <div class="task-meta">
+          <span class="tag tag-${task.priority}">${task.priority}</span>
+          <span class="tag">${icon} ${task.category}</span>
+          ${task.due ? `<span class="tag ${overdue ? 'tag-overdue':''}">${task.due}</span>` : ''}
+        </div>
+        <div class="task-actions">
+          <button onclick="editTask(${idx})">Edit</button>
+          <button class="btn-del" onclick="deleteTask(${idx})">Delete</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== STEP 4: MISSING FUNCTIONS =====
+
+function showSettings(){
+  document.getElementById('settingsModal').classList.add('active');
+}
+
+function closeSettings(){
+  document.getElementById('settingsModal').classList.remove('active');
+}
+
+function setTheme(theme){
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('tasksTheme', theme);
+}
+
+function loadTheme(){
+  const saved = localStorage.getItem('tasksTheme') || 'midnight';
+  document.body.setAttribute('data-theme', saved);
+}
+
+function exportData(){
+  if(tasks.length === 0){
+    alert('No tasks to export!');
+    return;
+  }
+  const dataStr = JSON.stringify(tasks, null, 2);
+  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'tasks_backup.json';
+  link.click();
+  showToast('Tasks exported!');
+}
+
+function clearAll(){
+  if(tasks.length === 0){
+    alert('No tasks to clear!');
+    return;
+  }
+  if(confirm('Delete ALL tasks? This cannot be undone!')){
+    tasks = [];
+    localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+    render();
+    closeSettings();
+    showToast('All tasks cleared!');
+  }
+}
+
+// ===== INITIALIZE =====
 function init(){
-render();
+  loadTheme();
+  render();
 }
 
 init();
 
+// ===== MAIN RENDER FUNCTION =====
 function render(){
+  var container = document.getElementById('tasksContainer');
+  var filtered = tasks;
 
-var container = document.getElementById('tasksContainer');
+  if(currentTab === 'pending'){
+    filtered = tasks.filter(t => !t.done);
+  }
 
-var filtered = tasks;
+  if(currentTab === 'completed'){
+    filtered = tasks.filter(t => t.done);
+  }
 
-if(currentTab === 'pending'){
-filtered = tasks.filter(t => !t.done);
-}
+  var completed = tasks.filter(t => t.done).length;
+  var total = tasks.length;
+  var percent = total > 0 ? Math.round((completed/total)*100) : 0;
 
-if(currentTab === 'completed'){
-filtered = tasks.filter(t => t.done);
-}
+  document.getElementById('progressBar').style.width = percent + '%';
+  document.getElementById('progressText').innerText = completed + ' of ' + total + ' completed';
+  document.getElementById('progressPercent').innerText = percent + '%';
+  document.getElementById('totalTasks').innerText = total;
 
-var completed = tasks.filter(t => t.done).length;
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('todayTasks').innerText = tasks.filter(t => t.due === today).length;
+  document.getElementById('overdueTasks').innerText = tasks.filter(t => !t.done && t.due && t.due < today).length;
+  document.getElementById('streakTasks').innerText = completed;
 
-var total = tasks.length;
+  if(filtered.length === 0){
+    container.innerHTML = `
+      <div class="empty">
+        <div class="icon">📝</div>
+        <div class="text">No tasks yet!<br>Tap + to add</div>
+      </div>
+    `;
+    return;
+  }
 
-var percent = total > 0
-? Math.round((completed/total)*100)
-: 0;
-
-document.getElementById('progressBar').style.width = percent + '%';
-
-document.getElementById('progressText').innerText =
-completed + ' of ' + total + ' completed';
-
-document.getElementById('progressPercent').innerText =
-percent + '%';
-
-document.getElementById('totalTasks').innerText = total;
-
-var today = new Date().toISOString().split('T')[0];
-
-document.getElementById('todayTasks').innerText =
-tasks.filter(t => t.due === today).length;
-
-document.getElementById('overdueTasks').innerText =
-tasks.filter(t => !t.done && t.due && t.due < today).length;
-
-document.getElementById('streakTasks').innerText =
-completed;
-
-if(filtered.length === 0){
-
-container.innerHTML = `
-<div class="empty">
-<div class="icon">📝</div>
-<div class="text">
-No tasks yet!<br>
-Tap + to add
-</div>
-</div>
-`;
-
-return;
-}
-
-container.innerHTML = filtered.map(task => {
-
-var idx = tasks.indexOf(task);
-
-var icon = {
-personal:'👤',
-work:'💼',
-study:'📚',
-health:'💪',
-shopping:'🛒'
-}[task.category] || '📌';
-
-var overdue =
-!task.done &&
-task.due &&
-task.due < today;
-
-return `
-
-<div class="task ${task.done ? 'completed' : ''}">
-
-<input
-type="checkbox"
-class="task-check"
-${task.done ? 'checked' : ''}
-onchange="toggle(${idx})"
->
-
-<div class="task-content">
-
-<div class="task-text">${task.text}</div>
-
-${task.desc
-? `<div class="task-desc">${task.desc}</div>`
-: ''}
-
-<div class="task-meta">
-
-<span class="tag tag-${task.priority}">
-${task.priority}
-</span>
-
-<span class="tag">
-${icon} ${task.category}
-</span>
-
-${task.due
-? `<span class="tag ${overdue ? 'tag-overdue':''}">
-${task.due}
-</span>`
-: ''}
-
-</div>
-
-<div class="task-actions">
-
-<button onclick="editTask(${idx})">
-Edit
-</button>
-
-<button class="btn-del"
-onclick="deleteTask(${idx})">
-Delete
-</button>
-
-</div>
-
-</div>
-</div>
-`;
-
-}).join('');
+  // Using renderTaskHTML helper function instead of duplicate code
+  container.innerHTML = filtered.map(task => {
+    const idx = tasks.indexOf(task);
+    return renderTaskHTML(task, idx, today);
+  }).join('');
 }
 
 function openAddModal(){
-
-editIndex = null;
-
-document.getElementById('addTitle').innerText =
-'New Task';
-
-document.getElementById('taskName').value = '';
-
-document.getElementById('taskDesc').value = '';
-
-document.getElementById('taskCategory').value =
-'personal';
-
-document.getElementById('taskPriority').value =
-'low';
-
-document.getElementById('taskDue').value = '';
-
-document.getElementById('addModal')
-.classList.add('active');
+  editIndex = null;
+  document.getElementById('addTitle').innerText = 'New Task';
+  document.getElementById('taskName').value = '';
+  document.getElementById('taskDesc').value = '';
+  document.getElementById('taskCategory').value = 'personal';
+  document.getElementById('taskPriority').value = 'low';
+  document.getElementById('taskDue').value = '';
+  document.getElementById('addModal').classList.add('active');
 }
 
 function closeAddModal(){
-document.getElementById('addModal')
-.classList.remove('active');
+  document.getElementById('addModal').classList.remove('active');
 }
 
 function saveTask(){
+  var text = document.getElementById('taskName').value.trim();
 
-var text =
-document.getElementById('taskName')
-.value.trim();
+  if(!text){
+    alert('Enter task name');
+    return;
+  }
 
-if(!text){
-alert('Enter task name');
-return;
-}
+  // STEP 4: DATE VALIDATION - Prevent past dates
+  var dueDate = document.getElementById('taskDue').value;
+  var today = new Date().toISOString().split('T')[0];
+  
+  if(dueDate && dueDate < today){
+    alert('Due date cannot be in the past!');
+    return;
+  }
 
-var task = {
+  var task = {
+    text: text,
+    desc: document.getElementById('taskDesc').value,
+    category: document.getElementById('taskCategory').value,
+    priority: document.getElementById('taskPriority').value,
+    due: dueDate,
+    done: false
+  };
 
-text:text,
+  if(editIndex !== null){
+    task.done = tasks[editIndex].done;
+    tasks[editIndex] = task;
+  } else {
+    tasks.unshift(task);
+  }
 
-desc:document.getElementById('taskDesc').value,
-
-category:document.getElementById('taskCategory').value,
-
-priority:document.getElementById('taskPriority').value,
-
-due:document.getElementById('taskDue').value,
-
-done:false
-};
-
-if(editIndex !== null){
-
-task.done = tasks[editIndex].done;
-
-tasks[editIndex] = task;
-
-}else{
-
-tasks.unshift(task);
-}
-
-localStorage.setItem(
-'tasksUltra',
-JSON.stringify(tasks)
-);
-
-render();
-
-closeAddModal();
-
-showToast('Task Saved!');
+  localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+  render();
+  closeAddModal();
+  showToast('Task Saved!');
 }
 
 function toggle(i){
-
-tasks[i].done = !tasks[i].done;
-
-localStorage.setItem(
-'tasksUltra',
-JSON.stringify(tasks)
-);
-
-render();
+  tasks[i].done = !tasks[i].done;
+  localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+  render();
 }
 
 function editTask(i){
+  editIndex = i;
+  var t = tasks[i];
 
-editIndex = i;
-
-var t = tasks[i];
-
-document.getElementById('addTitle').innerText =
-'Edit Task';
-
-document.getElementById('taskName').value =
-t.text;
-
-document.getElementById('taskDesc').value =
-t.desc || '';
-
-document.getElementById('taskCategory').value =
-t.category;
-
-document.getElementById('taskPriority').value =
-t.priority;
-
-document.getElementById('taskDue').value =
-t.due || '';
-
-document.getElementById('addModal')
-.classList.add('active');
+  document.getElementById('addTitle').innerText = 'Edit Task';
+  document.getElementById('taskName').value = t.text;
+  document.getElementById('taskDesc').value = t.desc || '';
+  document.getElementById('taskCategory').value = t.category;
+  document.getElementById('taskPriority').value = t.priority;
+  document.getElementById('taskDue').value = t.due || '';
+  document.getElementById('addModal').classList.add('active');
 }
 
 function deleteTask(i){
-
-if(confirm('Delete this task?')){
-
-tasks.splice(i,1);
-
-localStorage.setItem(
-'tasksUltra',
-JSON.stringify(tasks)
-);
-
-render();
-
-showToast('Task Deleted!');
-}
+  if(confirm('Delete this task?')){
+    tasks.splice(i, 1);
+    localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+    render();
+    showToast('Task Deleted!');
+  }
 }
 
-function switchTab(tab,el){
-
-currentTab = tab;
-
-document.querySelectorAll('.tab')
-.forEach(btn => {
-btn.classList.remove('active');
-});
-
-el.classList.add('active');
-
-render();
+function switchTab(tab, el){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  el.classList.add('active');
+  render();
 }
 
 function searchTasks(query){
+  query = query.toLowerCase();
 
-query = query.toLowerCase();
+  var filtered = tasks.filter(task =>
+    task.text.toLowerCase().includes(query) ||
+    (task.desc && task.desc.toLowerCase().includes(query))
+  );
 
-var filtered = tasks.filter(task =>
+  // STEP 4: FIX - Search respects current tab filter
+  if(currentTab === 'pending') filtered = filtered.filter(t => !t.done);
+  if(currentTab === 'completed') filtered = filtered.filter(t => t.done);
 
-task.text.toLowerCase().includes(query)
+  var container = document.getElementById('tasksContainer');
 
-||
+  if(filtered.length === 0){
+    container.innerHTML = `
+      <div class="empty">
+        <div class="icon">🔍</div>
+        <div class="text">No matching tasks</div>
+      </div>
+    `;
+    return;
+  }
 
-(task.desc &&
-task.desc.toLowerCase().includes(query))
+  var today = new Date().toISOString().split('T')[0];
 
-);
-
-var container =
-document.getElementById('tasksContainer');
-
-if(filtered.length === 0){
-
-container.innerHTML = `
-<div class="empty">
-<div class="icon">🔍</div>
-<div class="text">No matching tasks</div>
-</div>
-`;
-
-return;
-}
-
-var today =
-new Date().toISOString().split('T')[0];
-
-container.innerHTML = filtered.map(task => {
-
-var idx = tasks.indexOf(task);
-
-var icon = {
-personal:'👤',
-work:'💼',
-study:'📚',
-health:'💪',
-shopping:'🛒'
-}[task.category] || '📌';
-
-return `
-<div class="task ${task.done ? 'completed':''}">
-
-<input type="checkbox"
-class="task-check"
-${task.done ? 'checked':''}
-onchange="toggle(${idx})">
-
-<div class="task-content">
-
-<div class="task-text">
-${task.text}
-</div>
-
-${task.desc
-? `<div class="task-desc">${task.desc}</div>`
-: ''}
-
-<div class="task-meta">
-
-<span class="tag tag-${task.priority}">
-${task.priority}
-</span>
-
-<span class="tag">
-${icon} ${task.category}
-</span>
-
-${task.due
-? `<span class="tag">
-${task.due}
-</span>`
-: ''}
-
-</div>
-
-<div class="task-actions">
-
-<button onclick="editTask(${idx})">
-Edit
-</button>
-
-<button class="btn-del"
-onclick="deleteTask(${idx})">
-Delete
-</button>
-
-</div>
-
-</div>
-</div>
-`;
-
-}).join('');
+  // Using renderTaskHTML helper function instead of duplicate code
+  container.innerHTML = filtered.map(task => {
+    const idx = tasks.indexOf(task);
+    return renderTaskHTML(task, idx, today);
+  }).join('');
 }
 
 function showToast(msg){
-
-var toast =
-document.getElementById('toast');
-
-toast.innerText = msg;
-
-toast.classList.add('show');
-
-setTimeout(() => {
-toast.classList.remove('show');
-},2000);
+  var toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
 }
-
-function showSettings(){
-
-document.getElementById('settingsModal')
-.classList.add('active');
-}
-
-function closeSettings(){
-
-document.getElementById('settingsModal')
-.classList.remove('active');
-}
-
-function setTheme(theme){
-
-document.body.setAttribute(
-'data-theme',
-theme
-);
-
-localStorage.setItem(
-'tasksTheme',
-theme
-);
-
-showToast('Theme Changed!');
-}
-
-function exportData(){
-
-var data =
-"data:text/json;charset=utf-8," +
-encodeURIComponent(
-JSON.stringify(tasks,null,2)
-);
-
-var a =
-document.createElement('a');
-
-a.href = data;
-
-a.download = 'tasks-ultra-backup.json';
-
-a.click();
-
-showToast('Exported!');
-}
-
-function clearAll(){
-
-if(confirm('Delete all tasks?')){
-
-tasks = [];
-
-localStorage.removeItem('tasksUltra');
-
-render();
-
-showToast('All Cleared!');
-}
-}
-
-window.onload = function(){
-
-var savedTheme =
-localStorage.getItem('tasksTheme');
-
-if(savedTheme){
-
-document.body.setAttribute(
-'data-theme',
-savedTheme
-);
-}
-
-render();
-};
 
 </script>
 
