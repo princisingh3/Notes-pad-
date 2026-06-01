@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks Ultra Pro Max</title>
+<title>Tasks Ultra Pro Max Advanced</title>
 
 <style>
 *{
@@ -71,6 +71,12 @@ z-index:100;
 font-size:20px;
 }
 
+.header-icons{
+display:flex;
+gap:10px;
+position:relative;
+}
+
 .header button{
 width:40px;
 height:40px;
@@ -81,10 +87,33 @@ color:#fff;
 font-size:18px;
 cursor:pointer;
 transition:0.2s;
+position:relative;
 }
 
 .header button:hover{
 background:rgba(255,255,255,0.3);
+}
+
+.notification-badge{
+position:absolute;
+top:-5px;
+right:-5px;
+background:var(--danger);
+color:#fff;
+border-radius:50%;
+width:20px;
+height:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:11px;
+font-weight:bold;
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1);}
+50%{transform:scale(1.1);}
 }
 
 .stats{
@@ -158,6 +187,7 @@ color:var(--text2);
 cursor:pointer;
 font-size:13px;
 transition:0.2s;
+white-space:nowrap;
 }
 
 .tab:hover{
@@ -169,12 +199,18 @@ background:var(--primary);
 color:#fff;
 }
 
-.search{
+.search-section{
 padding:0 15px 15px;
 }
 
+.search{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
 .search input{
-width:100%;
+flex:1;
 padding:14px;
 border:none;
 border-radius:14px;
@@ -185,6 +221,48 @@ font-size:14px;
 
 .search input::placeholder{
 color:var(--text2);
+}
+
+.search-filter{
+padding:10px 14px;
+border:none;
+border-radius:14px;
+background:var(--surface2);
+color:#fff;
+cursor:pointer;
+font-size:13px;
+min-width:120px;
+}
+
+.sort-options{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+padding:0 15px;
+margin-bottom:15px;
+overflow-x:auto;
+}
+
+.sort-btn{
+padding:8px 14px;
+background:var(--surface2);
+border:none;
+border-radius:20px;
+color:var(--text2);
+cursor:pointer;
+font-size:12px;
+transition:0.2s;
+white-space:nowrap;
+}
+
+.sort-btn:hover{
+background:var(--primary);
+color:#fff;
+}
+
+.sort-btn.active{
+background:var(--primary);
+color:#fff;
 }
 
 .tasks{
@@ -200,6 +278,13 @@ display:flex;
 gap:12px;
 margin-bottom:14px;
 animation:fade 0.3s ease;
+position:relative;
+transition:0.2s;
+}
+
+.task:hover{
+transform:translateY(-2px);
+box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
 
 @keyframes fade{
@@ -225,6 +310,8 @@ text-decoration:line-through;
 width:22px;
 height:22px;
 accent-color:var(--primary);
+margin-top:2px;
+cursor:pointer;
 }
 
 .task-content{
@@ -276,6 +363,47 @@ color:#fff;
 .tag-overdue{
 background:var(--danger);
 color:#fff;
+animation:pulse 1s infinite;
+}
+
+.tag-recurring{
+background:var(--primary);
+color:#fff;
+}
+
+.subtask-list{
+margin-top:10px;
+padding-left:15px;
+border-left:2px solid var(--surface2);
+}
+
+.subtask{
+display:flex;
+gap:8px;
+padding:8px 0;
+font-size:12px;
+color:var(--text2);
+align-items:center;
+}
+
+.subtask input[type="checkbox"]{
+width:14px;
+height:14px;
+accent-color:var(--primary);
+cursor:pointer;
+}
+
+.subtask span{
+flex:1;
+}
+
+.subtask-remove{
+background:none;
+border:none;
+color:var(--danger);
+cursor:pointer;
+font-size:14px;
+padding:0 4px;
 }
 
 .task-actions{
@@ -291,6 +419,11 @@ cursor:pointer;
 background:var(--surface2);
 color:#fff;
 font-size:12px;
+transition:0.2s;
+}
+
+.task-actions button:hover{
+background:var(--primary);
 }
 
 .btn-del{
@@ -310,6 +443,13 @@ color:#fff;
 font-size:30px;
 cursor:pointer;
 z-index:1000;
+transition:0.2s;
+box-shadow:0 4px 12px rgba(102,126,234,0.4);
+}
+
+.fab:hover{
+transform:scale(1.1);
+box-shadow:0 6px 16px rgba(102,126,234,0.6);
 }
 
 .modal{
@@ -326,6 +466,12 @@ overflow-y:auto;
 
 .modal.active{
 display:block;
+animation:slideUp 0.3s ease;
+}
+
+@keyframes slideUp{
+from{opacity:0;}
+to{opacity:1;}
 }
 
 .modal-content{
@@ -362,6 +508,7 @@ display:block;
 font-size:12px;
 margin-bottom:8px;
 color:var(--text2);
+font-weight:600;
 }
 
 .form-input,
@@ -373,11 +520,21 @@ border-radius:14px;
 background:var(--surface2);
 color:#fff;
 font-size:15px;
+transition:0.2s;
+}
+
+.form-input:focus,
+.form-select:focus{
+outline:none;
+background:var(--surface2);
+border:2px solid var(--primary);
+padding:12px;
 }
 
 textarea{
 resize:none;
 min-height:90px;
+font-family:inherit;
 }
 
 .btn{
@@ -389,6 +546,11 @@ font-size:16px;
 font-weight:600;
 cursor:pointer;
 margin-top:10px;
+transition:0.2s;
+}
+
+.btn:hover{
+transform:translateY(-2px);
 }
 
 .btn-primary{
@@ -417,6 +579,64 @@ aspect-ratio:1;
 border-radius:14px;
 cursor:pointer;
 border:3px solid transparent;
+transition:0.2s;
+}
+
+.theme-opt:hover{
+transform:scale(1.05);
+}
+
+.recurring-options{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-top:10px;
+}
+
+.recurring-opt{
+padding:10px;
+background:var(--surface2);
+border:2px solid transparent;
+border-radius:10px;
+text-align:center;
+cursor:pointer;
+font-size:12px;
+transition:0.2s;
+}
+
+.recurring-opt:hover{
+border-color:var(--primary);
+}
+
+.recurring-opt.selected{
+border-color:var(--primary);
+background:rgba(102,126,234,0.2);
+}
+
+.subtask-add{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.subtask-add input{
+flex:1;
+padding:8px 12px;
+border:none;
+border-radius:8px;
+background:var(--surface2);
+color:#fff;
+font-size:12px;
+}
+
+.subtask-add button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+background:var(--primary);
+color:#fff;
+cursor:pointer;
+font-size:12px;
 }
 
 .empty{
@@ -452,18 +672,90 @@ z-index:3000;
 .toast.show{
 opacity:1;
 }
+
+.notification-item{
+background:var(--surface2);
+padding:15px;
+border-radius:12px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.notification-item.overdue{
+border-left:4px solid var(--danger);
+}
+
+.notification-item.today{
+border-left:4px solid var(--accent);
+}
+
+.analytics-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+margin-top:15px;
+}
+
+.analytics-item{
+background:var(--surface2);
+padding:15px;
+border-radius:12px;
+}
+
+.analytics-title{
+font-weight:bold;
+margin-bottom:10px;
+color:var(--accent);
+}
+
+.analytics-stat{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.analytics-stat:last-child{
+border-bottom:none;
+}
+
+@media (max-width: 640px){
+.stats-grid{
+grid-template-columns:repeat(2,1fr);
+}
+.header{
+padding:15px;
+}
+.modal-content{
+padding:15px;
+}
+.recurring-options{
+grid-template-columns:repeat(2,1fr);
+}
+.analytics-grid{
+grid-template-columns:1fr;
+}
+}
 </style>
 </head>
 
 <body data-theme="midnight">
 
 <div class="header">
-<h1>✅ Tasks Ultra Pro</h1>
-<button onclick="showSettings()" title="Settings" aria-label="Open settings">⚙️</button>
+<h1>✅ Tasks Ultra Pro Max</h1>
+<div class="header-icons">
+<button onclick="showNotifications()" title="Notifications" style="position:relative;">
+🔔
+<span class="notification-badge" id="notificationBadge" style="display:none;"></span>
+</button>
+<button onclick="showStats()" title="Analytics">📊</button>
+<button onclick="showSettings()" title="Settings">⚙️</button>
+</div>
 </div>
 
 <div class="stats">
-
 <div class="progress-wrap">
 <div class="progress-fill" id="progressBar"></div>
 </div>
@@ -474,7 +766,6 @@ opacity:1;
 </div>
 
 <div class="stats-grid">
-
 <div class="stat-box">
 <div class="stat-num" id="totalTasks">0</div>
 <div class="stat-label">Total</div>
@@ -494,7 +785,6 @@ opacity:1;
 <div class="stat-num" id="streakTasks">0</div>
 <div class="stat-label">Done</div>
 </div>
-
 </div>
 </div>
 
@@ -502,26 +792,42 @@ opacity:1;
 <button class="tab active" onclick="switchTab('all',this)">🏠 All</button>
 <button class="tab" onclick="switchTab('pending',this)">⏳ Pending</button>
 <button class="tab" onclick="switchTab('completed',this)">✅ Done</button>
+<button class="tab" onclick="switchTab('today',this)">📅 Today</button>
+<button class="tab" onclick="switchTab('overdue',this)">⚠️ Overdue</button>
 </div>
 
+<div class="search-section">
 <div class="search">
-<input type="text" placeholder="🔍 Search tasks..." onkeyup="searchTasks(this.value)" aria-label="Search tasks">
+<input type="text" placeholder="🔍 Search tasks..." onkeyup="debounceSearch(this.value)" aria-label="Search tasks">
+<select class="search-filter" onchange="filterByPriority(this.value)">
+<option value="">All Priority</option>
+<option value="high">🔴 High</option>
+<option value="medium">🟠 Medium</option>
+<option value="low">🟢 Low</option>
+</select>
+</div>
+
+<div class="sort-options" id="sortOptions">
+<button class="sort-btn active" onclick="setSortOrder('recent')">Recent</button>
+<button class="sort-btn" onclick="setSortOrder('priority')">Priority</button>
+<button class="sort-btn" onclick="setSortOrder('duedate')">Due Date</button>
+<button class="sort-btn" onclick="setSortOrder('category')">Category</button>
+</div>
 </div>
 
 <div class="tasks" id="tasksContainer"></div>
 
-<button class="fab" onclick="openAddModal()" title="Add new task" aria-label="Add new task">+</button>
+<button class="fab" onclick="openAddModal()" title="Add new task">+</button>
 
 <div class="toast" id="toast">Saved!</div>
 
 <!-- ADD MODAL -->
-
 <div class="modal" id="addModal">
 <div class="modal-content">
 
 <div class="modal-header">
 <h2 id="addTitle">New Task</h2>
-<button onclick="closeAddModal()" aria-label="Close modal">✕</button>
+<button onclick="closeAddModal()">✕</button>
 </div>
 
 <div class="form-group">
@@ -536,7 +842,6 @@ opacity:1;
 
 <div class="form-group">
 <label class="form-label">Category</label>
-
 <select id="taskCategory" class="form-select">
 <option value="personal">👤 Personal</option>
 <option value="work">💼 Work</option>
@@ -544,23 +849,40 @@ opacity:1;
 <option value="health">💪 Health</option>
 <option value="shopping">🛒 Shopping</option>
 </select>
-
 </div>
 
 <div class="form-group">
 <label class="form-label">Priority</label>
-
 <select id="taskPriority" class="form-select">
 <option value="low">🟢 Low</option>
 <option value="medium">🟠 Medium</option>
 <option value="high">🔴 High</option>
 </select>
-
 </div>
 
 <div class="form-group">
 <label class="form-label">Due Date</label>
 <input type="date" id="taskDue" class="form-input">
+</div>
+
+<div class="form-group">
+<label class="form-label">Recurring</label>
+<div class="recurring-options">
+<div class="recurring-opt" onclick="setRecurring('none')" data-recurring="none">None</div>
+<div class="recurring-opt" onclick="setRecurring('daily')" data-recurring="daily">Daily</div>
+<div class="recurring-opt" onclick="setRecurring('weekly')" data-recurring="weekly">Weekly</div>
+<div class="recurring-opt" onclick="setRecurring('monthly')" data-recurring="monthly">Monthly</div>
+</div>
+<input type="hidden" id="taskRecurring" value="none">
+</div>
+
+<div class="form-group" id="subtaskContainer">
+<label class="form-label">Subtasks</label>
+<div id="subtasksList"></div>
+<div class="subtask-add">
+<input type="text" id="subtaskInput" placeholder="Add subtask...">
+<button onclick="addSubtask()">Add</button>
+</div>
 </div>
 
 <button class="btn btn-primary" onclick="saveTask()">💾 Save Task</button>
@@ -569,36 +891,51 @@ opacity:1;
 </div>
 </div>
 
-<!-- SETTINGS -->
+<!-- NOTIFICATIONS MODAL -->
+<div class="modal" id="notificationsModal">
+<div class="modal-content">
+<div class="modal-header">
+<h2>🔔 Notifications</h2>
+<button onclick="closeNotifications()">✕</button>
+</div>
+<div id="notificationsList"></div>
+</div>
+</div>
 
+<!-- ANALYTICS MODAL -->
+<div class="modal" id="analyticsModal">
+<div class="modal-content">
+<div class="modal-header">
+<h2>📊 Analytics & Statistics</h2>
+<button onclick="closeStats()">✕</button>
+</div>
+
+<div id="analyticsContent"></div>
+
+</div>
+</div>
+
+<!-- SETTINGS -->
 <div class="modal" id="settingsModal">
 <div class="modal-content">
 
 <div class="modal-header">
 <h2>⚙️ Settings</h2>
-<button onclick="closeSettings()" aria-label="Close settings">✕</button>
+<button onclick="closeSettings()">✕</button>
 </div>
 
 <div class="form-group">
-
 <label class="form-label">Themes</label>
-
 <div class="theme-grid">
-
-<div class="theme-opt" style="background:#667eea" onclick="setTheme('midnight')"></div>
-
-<div class="theme-opt" style="background:#0ea5e9" onclick="setTheme('ocean')"></div>
-
-<div class="theme-opt" style="background:#f43f5e" onclick="setTheme('sunset')"></div>
-
-<div class="theme-opt" style="background:#22c55e" onclick="setTheme('forest')"></div>
-
+<div class="theme-opt" style="background:#667eea" onclick="setTheme('midnight')" title="Midnight"></div>
+<div class="theme-opt" style="background:#0ea5e9" onclick="setTheme('ocean')" title="Ocean"></div>
+<div class="theme-opt" style="background:#f43f5e" onclick="setTheme('sunset')" title="Sunset"></div>
+<div class="theme-opt" style="background:#22c55e" onclick="setTheme('forest')" title="Forest"></div>
 </div>
-
 </div>
 
 <button class="btn btn-primary" onclick="exportData()">📤 Export Data</button>
-
+<button class="btn btn-primary" onclick="importData()">📥 Import Data</button>
 <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear All Tasks</button>
 
 </div>
@@ -606,12 +943,10 @@ opacity:1;
 
 <script>
 
-// ===== STEP 1: DATA & STATE MANAGEMENT =====
-var tasks = JSON.parse(localStorage.getItem('tasksUltra')) || [];
-var currentTab = 'all';
-var editIndex = null;
+// ===== CONSTANTS =====
+const STORAGE_KEY = 'tasksUltra';
+const THEME_KEY = 'tasksTheme';
 
-// ===== STEP 2: CATEGORY ICONS (REMOVE DUPLICATE CODE) =====
 const CATEGORY_ICONS = {
   personal: '👤',
   work: '💼',
@@ -620,27 +955,327 @@ const CATEGORY_ICONS = {
   shopping: '🛒'
 };
 
-// ===== STEP 3: HELPER FUNCTION - RENDER TASK HTML =====
-function renderTaskHTML(task, idx, today){
+const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };
+
+// ===== STATE VARIABLES =====
+var tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+var currentTab = 'all';
+var editIndex = null;
+var currentSort = 'recent';
+var searchQuery = '';
+var searchTimeout;
+var currentPriorityFilter = '';
+var subtasksList = [];
+var recurringType = 'none';
+
+// ===== FEATURE 1: RECURRING TASKS 📅 =====
+
+function setRecurring(type) {
+  recurringType = type;
+  document.querySelectorAll('.recurring-opt').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  document.querySelector(`[data-recurring="${type}"]`).classList.add('selected');
+  document.getElementById('taskRecurring').value = type;
+}
+
+// ===== FEATURE 2: SUBTASKS SUPPORT ✅ =====
+
+function addSubtask() {
+  const input = document.getElementById('subtaskInput');
+  if (input.value.trim()) {
+    subtasksList.push({ text: input.value, done: false });
+    renderSubtasks();
+    input.value = '';
+  }
+}
+
+function removeSubtask(idx) {
+  subtasksList.splice(idx, 1);
+  renderSubtasks();
+}
+
+function renderSubtasks() {
+  const container = document.getElementById('subtasksList');
+  if (subtasksList.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = subtasksList.map((st, idx) => `
+    <div class="subtask">
+      <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleSubtask(${idx})">
+      <span>${escapeHtml(st.text)}</span>
+      <button class="subtask-remove" onclick="removeSubtask(${idx})">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleSubtask(idx) {
+  subtasksList[idx].done = !subtasksList[idx].done;
+}
+
+function toggleTaskSubtask(taskIdx, subtaskIdx) {
+  if (!tasks[taskIdx].subtasks) tasks[taskIdx].subtasks = [];
+  tasks[taskIdx].subtasks[subtaskIdx].done = !tasks[taskIdx].subtasks[subtaskIdx].done;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  render();
+}
+
+// ===== FEATURE 3: ADVANCED SORTING & FILTERING 🔽 =====
+
+function debounceSearch(query) {
+  clearTimeout(searchTimeout);
+  searchQuery = query;
+  searchTimeout = setTimeout(() => {
+    searchTasks(query);
+  }, 300);
+}
+
+function setSortOrder(order) {
+  currentSort = order;
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function getSortedTasks(taskList) {
+  let sorted = [...taskList];
+  
+  if (currentSort === 'priority') {
+    sorted.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  } else if (currentSort === 'duedate') {
+    sorted.sort((a, b) => {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return new Date(a.due) - new Date(b.due);
+    });
+  } else if (currentSort === 'category') {
+    sorted.sort((a, b) => a.category.localeCompare(b.category));
+  }
+  
+  return sorted;
+}
+
+function filterByPriority(priority) {
+  currentPriorityFilter = priority;
+  render();
+}
+
+// ===== FEATURE 4: ANALYTICS/STATISTICS 📊 =====
+
+function showStats() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.done).length;
+  const pending = total - completed;
+  const today = new Date().toISOString().split('T')[0];
+  const overdue = tasks.filter(t => !t.done && t.due && t.due < today).length;
+  
+  const byCategory = {};
+  tasks.forEach(t => {
+    byCategory[t.category] = (byCategory[t.category] || 0) + 1;
+  });
+  
+  const byPriority = {};
+  tasks.forEach(t => {
+    byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;
+  });
+  
+  const recurringCount = tasks.filter(t => t.recurring && t.recurring !== 'none').length;
+  const withSubtasks = tasks.filter(t => t.subtasks && t.subtasks.length > 0).length;
+  
+  let analyticsHTML = `
+    <div style="padding:20px 0;">
+      
+      <div class="analytics-grid">
+        <div class="analytics-item">
+          <div class="analytics-title">📊 Overall Stats</div>
+          <div class="analytics-stat">
+            <span>Total Tasks</span>
+            <strong style="color:var(--primary);">${total}</strong>
+          </div>
+          <div class="analytics-stat">
+            <span>Completed ✅</span>
+            <strong style="color:var(--accent);">${completed}</strong>
+          </div>
+          <div class="analytics-stat">
+            <span>Pending ⏳</span>
+            <strong style="color:var(--warning);">${pending}</strong>
+          </div>
+          <div class="analytics-stat">
+            <span>Overdue ⚠️</span>
+            <strong style="color:var(--danger);">${overdue}</strong>
+          </div>
+        </div>
+        
+        <div class="analytics-item">
+          <div class="analytics-title">🎯 Advanced Stats</div>
+          <div class="analytics-stat">
+            <span>Recurring Tasks 🔄</span>
+            <strong style="color:var(--primary);">${recurringCount}</strong>
+          </div>
+          <div class="analytics-stat">
+            <span>With Subtasks ✓</span>
+            <strong style="color:var(--accent);">${withSubtasks}</strong>
+          </div>
+          <div class="analytics-stat">
+            <span>Completion %</span>
+            <strong style="color:var(--accent);">${total > 0 ? Math.round((completed/total)*100) : 0}%</strong>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;">
+        <strong style="font-size:14px;">📂 By Category</strong>
+        <div style="margin-top:10px;">
+          ${Object.entries(byCategory).map(([cat, count]) => `
+            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
+              <span>${CATEGORY_ICONS[cat]} ${cat}</span>
+              <span style="font-weight:bold;">${count}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;">
+        <strong style="font-size:14px;">🎯 By Priority</strong>
+        <div style="margin-top:10px;">
+          ${Object.entries(byPriority).map(([pri, count]) => `
+            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
+              <span class="tag tag-${pri}">${pri.toUpperCase()}</span>
+              <span style="font-weight:bold;">${count}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+    </div>
+  `;
+  
+  document.getElementById('analyticsContent').innerHTML = analyticsHTML;
+  document.getElementById('analyticsModal').classList.add('active');
+}
+
+function closeStats() {
+  document.getElementById('analyticsModal').classList.remove('active');
+}
+
+// ===== FEATURE 5: NOTIFICATIONS BADGE 🔔 =====
+
+function updateNotificationBadge() {
+  const today = new Date().toISOString().split('T')[0];
+  const count = tasks.filter(t => 
+    !t.done && t.due && t.due <= today
+  ).length;
+  
+  const badge = document.getElementById('notificationBadge');
+  if (count > 0) {
+    badge.innerText = count;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function showNotifications() {
+  const notificationsList = document.getElementById('notificationsList');
+  const today = new Date().toISOString().split('T')[0];
+  
+  const overdueCount = tasks.filter(t => !t.done && t.due && t.due < today).length;
+  const todayCount = tasks.filter(t => !t.done && t.due === today).length;
+  
+  const overdueTasks = tasks.filter(t => !t.done && t.due && t.due < today).slice(0, 5);
+  const todayTasks = tasks.filter(t => !t.done && t.due === today).slice(0, 5);
+  
+  let html = '';
+  
+  if (overdueTasks.length > 0) {
+    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;">⚠️ Overdue Tasks (' + overdueCount + ')</strong>';
+    overdueTasks.forEach(t => {
+      html += `
+        <div class="notification-item overdue">
+          <div>
+            <div style="font-weight:bold;font-size:13px;">${escapeHtml(t.text)}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;">${t.due}</div>
+          </div>
+          <span style="font-size:12px;color:var(--danger);">DUE</span>
+        </div>
+      `;
+    });
+  }
+  
+  if (todayTasks.length > 0) {
+    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;margin-top:15px;">📅 Due Today (' + todayCount + ')</strong>';
+    todayTasks.forEach(t => {
+      html += `
+        <div class="notification-item today">
+          <div>
+            <div style="font-weight:bold;font-size:13px;">${escapeHtml(t.text)}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;">Today</div>
+          </div>
+          <span style="font-size:12px;color:var(--accent);">TODAY</span>
+        </div>
+      `;
+    });
+  }
+  
+  if (overdueTasks.length === 0 && todayTasks.length === 0) {
+    html = `
+      <div class="empty">
+        <div class="icon">✨</div>
+        <div class="text">No pending notifications!<br>Great work! 🎉</div>
+      </div>
+    `;
+  }
+  
+  notificationsList.innerHTML = html;
+  document.getElementById('notificationsModal').classList.add('active');
+}
+
+function closeNotifications() {
+  document.getElementById('notificationsModal').classList.remove('active');
+}
+
+// ===== UTILITY FUNCTIONS =====
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function renderTaskHTML(task, idx, today) {
   const icon = CATEGORY_ICONS[task.category] || '📌';
   const overdue = !task.done && task.due && task.due < today;
   
+  let subtasksHTML = '';
+  if (task.subtasks && task.subtasks.length > 0) {
+    const completedSubs = task.subtasks.filter(s => s.done).length;
+    subtasksHTML = `
+      <div class="subtask-list">
+        <strong style="font-size:11px;">Subtasks (${completedSubs}/${task.subtasks.length})</strong>
+        ${task.subtasks.map((st, sidx) => `
+          <div class="subtask">
+            <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleTaskSubtask(${idx}, ${sidx})">
+            <span>${escapeHtml(st.text)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
   return `
     <div class="task ${task.done ? 'completed' : ''}">
-      <input
-        type="checkbox"
-        class="task-check"
-        ${task.done ? 'checked' : ''}
-        onchange="toggle(${idx})"
-      >
+      <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onchange="toggle(${idx})">
       <div class="task-content">
-        <div class="task-text">${task.text}</div>
-        ${task.desc ? `<div class="task-desc">${task.desc}</div>` : ''}
+        <div class="task-text">${escapeHtml(task.text)}</div>
+        ${task.desc ? `<div class="task-desc">${escapeHtml(task.desc)}</div>` : ''}
         <div class="task-meta">
           <span class="tag tag-${task.priority}">${task.priority}</span>
           <span class="tag">${icon} ${task.category}</span>
           ${task.due ? `<span class="tag ${overdue ? 'tag-overdue':''}">${task.due}</span>` : ''}
+          ${task.recurring && task.recurring !== 'none' ? `<span class="tag tag-recurring">🔄 ${task.recurring}</span>` : ''}
         </div>
+        ${subtasksHTML}
         <div class="task-actions">
           <button onclick="editTask(${idx})">Edit</button>
           <button class="btn-del" onclick="deleteTask(${idx})">Delete</button>
@@ -650,79 +1285,119 @@ function renderTaskHTML(task, idx, today){
   `;
 }
 
-// ===== STEP 4: MISSING FUNCTIONS =====
+// ===== SETTINGS =====
 
-function showSettings(){
+function showSettings() {
   document.getElementById('settingsModal').classList.add('active');
 }
 
-function closeSettings(){
+function closeSettings() {
   document.getElementById('settingsModal').classList.remove('active');
 }
 
-function setTheme(theme){
+function setTheme(theme) {
   document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('tasksTheme', theme);
+  localStorage.setItem(THEME_KEY, theme);
 }
 
-function loadTheme(){
-  const saved = localStorage.getItem('tasksTheme') || 'midnight';
+function loadTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || 'midnight';
   document.body.setAttribute('data-theme', saved);
 }
 
-function exportData(){
-  if(tasks.length === 0){
+function exportData() {
+  if (tasks.length === 0) {
     alert('No tasks to export!');
     return;
   }
   const dataStr = JSON.stringify(tasks, null, 2);
-  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'tasks_backup.json';
+  link.download = 'tasks_backup_' + new Date().toISOString().split('T')[0] + '.json';
   link.click();
   showToast('Tasks exported!');
 }
 
-function clearAll(){
-  if(tasks.length === 0){
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          tasks = [...tasks, ...imported];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+          render();
+          updateNotificationBadge();
+          showToast('Tasks imported successfully!');
+        } else {
+          alert('Invalid JSON format');
+        }
+      } catch (err) {
+        alert('Error reading file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function clearAll() {
+  if (tasks.length === 0) {
     alert('No tasks to clear!');
     return;
   }
-  if(confirm('Delete ALL tasks? This cannot be undone!')){
+  if (confirm('Delete ALL tasks? This cannot be undone!')) {
     tasks = [];
-    localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     render();
+    updateNotificationBadge();
     closeSettings();
     showToast('All tasks cleared!');
   }
 }
 
-// ===== INITIALIZE =====
-function init(){
+// ===== MAIN FUNCTIONS =====
+
+function init() {
   loadTheme();
   render();
+  updateNotificationBadge();
 }
 
 init();
 
-// ===== MAIN RENDER FUNCTION =====
-function render(){
+function render() {
   var container = document.getElementById('tasksContainer');
   var filtered = tasks;
 
-  if(currentTab === 'pending'){
+  if (currentTab === 'pending') {
     filtered = tasks.filter(t => !t.done);
+  } else if (currentTab === 'completed') {
+    filtered = tasks.filter(t => t.done);
+  } else if (currentTab === 'today') {
+    const today = new Date().toISOString().split('T')[0];
+    filtered = tasks.filter(t => t.due === today);
+  } else if (currentTab === 'overdue') {
+    const today = new Date().toISOString().split('T')[0];
+    filtered = tasks.filter(t => !t.done && t.due && t.due < today);
   }
 
-  if(currentTab === 'completed'){
-    filtered = tasks.filter(t => t.done);
+  if (currentPriorityFilter) {
+    filtered = filtered.filter(t => t.priority === currentPriorityFilter);
   }
+
+  filtered = getSortedTasks(filtered);
 
   var completed = tasks.filter(t => t.done).length;
   var total = tasks.length;
-  var percent = total > 0 ? Math.round((completed/total)*100) : 0;
+  var percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   document.getElementById('progressBar').style.width = percent + '%';
   document.getElementById('progressText').innerText = completed + ' of ' + total + ' completed';
@@ -734,7 +1409,7 @@ function render(){
   document.getElementById('overdueTasks').innerText = tasks.filter(t => !t.done && t.due && t.due < today).length;
   document.getElementById('streakTasks').innerText = completed;
 
-  if(filtered.length === 0){
+  if (filtered.length === 0) {
     container.innerHTML = `
       <div class="empty">
         <div class="icon">📝</div>
@@ -744,41 +1419,46 @@ function render(){
     return;
   }
 
-  // Using renderTaskHTML helper function instead of duplicate code
   container.innerHTML = filtered.map(task => {
     const idx = tasks.indexOf(task);
     return renderTaskHTML(task, idx, today);
   }).join('');
 }
 
-function openAddModal(){
+function openAddModal() {
   editIndex = null;
+  subtasksList = [];
+  recurringType = 'none';
   document.getElementById('addTitle').innerText = 'New Task';
   document.getElementById('taskName').value = '';
   document.getElementById('taskDesc').value = '';
   document.getElementById('taskCategory').value = 'personal';
   document.getElementById('taskPriority').value = 'low';
   document.getElementById('taskDue').value = '';
+  document.getElementById('taskRecurring').value = 'none';
+  document.getElementById('subtaskInput').value = '';
+  renderSubtasks();
+  document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
+  document.querySelector('[data-recurring="none"]').classList.add('selected');
   document.getElementById('addModal').classList.add('active');
 }
 
-function closeAddModal(){
+function closeAddModal() {
   document.getElementById('addModal').classList.remove('active');
 }
 
-function saveTask(){
+function saveTask() {
   var text = document.getElementById('taskName').value.trim();
 
-  if(!text){
+  if (!text) {
     alert('Enter task name');
     return;
   }
 
-  // STEP 4: DATE VALIDATION - Prevent past dates
   var dueDate = document.getElementById('taskDue').value;
   var today = new Date().toISOString().split('T')[0];
-  
-  if(dueDate && dueDate < today){
+
+  if (dueDate && dueDate < today) {
     alert('Due date cannot be in the past!');
     return;
   }
@@ -789,31 +1469,39 @@ function saveTask(){
     category: document.getElementById('taskCategory').value,
     priority: document.getElementById('taskPriority').value,
     due: dueDate,
-    done: false
+    recurring: document.getElementById('taskRecurring').value,
+    subtasks: subtasksList,
+    done: false,
+    createdAt: new Date().toISOString()
   };
 
-  if(editIndex !== null){
+  if (editIndex !== null) {
     task.done = tasks[editIndex].done;
     tasks[editIndex] = task;
   } else {
     tasks.unshift(task);
   }
 
-  localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   render();
+  updateNotificationBadge();
   closeAddModal();
-  showToast('Task Saved!');
+  showToast('Task Saved! ✅');
 }
 
-function toggle(i){
+function toggle(i) {
   tasks[i].done = !tasks[i].done;
-  localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   render();
+  updateNotificationBadge();
 }
 
-function editTask(i){
+function editTask(i) {
   editIndex = i;
   var t = tasks[i];
+
+  subtasksList = JSON.parse(JSON.stringify(t.subtasks || []));
+  recurringType = t.recurring || 'none';
 
   document.getElementById('addTitle').innerText = 'Edit Task';
   document.getElementById('taskName').value = t.text;
@@ -821,20 +1509,29 @@ function editTask(i){
   document.getElementById('taskCategory').value = t.category;
   document.getElementById('taskPriority').value = t.priority;
   document.getElementById('taskDue').value = t.due || '';
+  document.getElementById('taskRecurring').value = t.recurring || 'none';
+  document.getElementById('subtaskInput').value = '';
+
+  renderSubtasks();
+  document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
+  document.querySelector(`[data-recurring="${t.recurring || 'none'}"]`).classList.add('selected');
+
   document.getElementById('addModal').classList.add('active');
 }
 
-function deleteTask(i){
-  if(confirm('Delete this task?')){
+function deleteTask(i) {
+  if (confirm('Delete this task?')) {
     tasks.splice(i, 1);
-    localStorage.setItem('tasksUltra', JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     render();
-    showToast('Task Deleted!');
+    updateNotificationBadge();
+    showToast('Task Deleted! 🗑️');
   }
 }
 
-function switchTab(tab, el){
+function switchTab(tab, el) {
   currentTab = tab;
+  currentPriorityFilter = '';
   document.querySelectorAll('.tab').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -842,7 +1539,7 @@ function switchTab(tab, el){
   render();
 }
 
-function searchTasks(query){
+function searchTasks(query) {
   query = query.toLowerCase();
 
   var filtered = tasks.filter(task =>
@@ -850,13 +1547,12 @@ function searchTasks(query){
     (task.desc && task.desc.toLowerCase().includes(query))
   );
 
-  // STEP 4: FIX - Search respects current tab filter
-  if(currentTab === 'pending') filtered = filtered.filter(t => !t.done);
-  if(currentTab === 'completed') filtered = filtered.filter(t => t.done);
+  if (currentTab === 'pending') filtered = filtered.filter(t => !t.done);
+  if (currentTab === 'completed') filtered = filtered.filter(t => t.done);
 
   var container = document.getElementById('tasksContainer');
 
-  if(filtered.length === 0){
+  if (filtered.length === 0) {
     container.innerHTML = `
       <div class="empty">
         <div class="icon">🔍</div>
@@ -868,14 +1564,13 @@ function searchTasks(query){
 
   var today = new Date().toISOString().split('T')[0];
 
-  // Using renderTaskHTML helper function instead of duplicate code
   container.innerHTML = filtered.map(task => {
     const idx = tasks.indexOf(task);
     return renderTaskHTML(task, idx, today);
   }).join('');
 }
 
-function showToast(msg){
+function showToast(msg) {
   var toast = document.getElementById('toast');
   toast.innerText = msg;
   toast.classList.add('show');
@@ -883,6 +1578,16 @@ function showToast(msg){
     toast.classList.remove('show');
   }, 2000);
 }
+
+// Close modals on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeAddModal();
+    closeSettings();
+    closeNotifications();
+    closeStats();
+  }
+});
 
 </script>
 
