@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks Ultra Pro Max Advanced Pro</title>
+<title>Tasks Ultra Pro Max Elite</title>
 
 <style>
 *{
@@ -24,6 +24,7 @@ font-family:-apple-system,sans-serif;
 --surface2:#252540;
 --text:#fff;
 --text2:#aaa;
+--critical:#ff1744;
 }
 
 [data-theme="midnight"]{
@@ -212,10 +213,12 @@ padding:0 15px 15px;
 display:flex;
 gap:10px;
 margin-bottom:10px;
+flex-wrap:wrap;
 }
 
 .search input{
 flex:1;
+min-width:200px;
 padding:14px;
 border:none;
 border-radius:14px;
@@ -237,6 +240,34 @@ color:#fff;
 cursor:pointer;
 font-size:13px;
 min-width:120px;
+}
+
+.saved-filters{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+padding:0 15px 15px;
+}
+
+.filter-chip{
+padding:8px 14px;
+background:var(--surface2);
+border:1px solid var(--primary);
+border-radius:20px;
+cursor:pointer;
+font-size:12px;
+color:var(--text2);
+transition:0.2s;
+}
+
+.filter-chip:hover{
+background:var(--primary);
+color:#fff;
+}
+
+.filter-chip.active{
+background:var(--primary);
+color:#fff;
 }
 
 .sort-options{
@@ -285,6 +316,25 @@ margin-bottom:14px;
 animation:fade 0.3s ease;
 position:relative;
 transition:0.2s;
+border-left:4px solid transparent;
+}
+
+.task.urgent-critical{
+border-left-color:var(--critical);
+animation:blinkCritical 0.6s infinite;
+}
+
+.task.urgent-high{
+border-left-color:var(--danger);
+}
+
+.task.urgent-medium{
+border-left-color:var(--warning);
+}
+
+@keyframes blinkCritical{
+0%,100%{box-shadow:0 0 10px rgba(255,23,68,0.3);}
+50%{box-shadow:0 0 20px rgba(255,23,68,0.6);}
 }
 
 .task:hover{
@@ -380,6 +430,59 @@ color:#fff;
 background:rgba(102,126,234,0.3);
 color:var(--primary);
 border:1px solid var(--primary);
+}
+
+.tag-urgent-critical{
+background:var(--critical);
+color:#fff;
+font-weight:bold;
+}
+
+.tag-urgent-high{
+background:var(--danger);
+color:#fff;
+}
+
+.tag-urgent-medium{
+background:var(--warning);
+color:#000;
+}
+
+.timer-section{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
+}
+
+.timer-display{
+font-size:14px;
+font-weight:bold;
+color:var(--accent);
+background:var(--surface2);
+padding:6px 12px;
+border-radius:8px;
+min-width:60px;
+text-align:center;
+}
+
+.timer-btn{
+padding:6px 10px;
+font-size:11px;
+background:var(--primary);
+color:#fff;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.auto-complete-badge{
+background:var(--accent);
+color:#000;
+padding:4px 8px;
+border-radius:6px;
+font-size:10px;
+font-weight:bold;
 }
 
 .subtask-list{
@@ -586,6 +689,43 @@ font-size:13px;
 margin-top:5px;
 }
 
+.urgency-options{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-top:10px;
+}
+
+.urgency-opt{
+padding:12px;
+background:var(--surface2);
+border:2px solid transparent;
+border-radius:10px;
+text-align:center;
+cursor:pointer;
+font-size:12px;
+transition:0.2s;
+}
+
+.urgency-opt:hover{
+border-color:var(--primary);
+}
+
+.urgency-opt.selected{
+border-color:var(--primary);
+background:rgba(102,126,234,0.2);
+}
+
+.urgency-opt.critical{
+border-color:var(--critical);
+background:rgba(255,23,68,0.1);
+}
+
+.urgency-opt.critical.selected{
+border-color:var(--critical);
+background:rgba(255,23,68,0.2);
+}
+
 .theme-grid{
 display:grid;
 grid-template-columns:repeat(4,1fr);
@@ -691,6 +831,11 @@ z-index:3000;
 opacity:1;
 }
 
+.toast.critical{
+background:var(--critical);
+color:#fff;
+}
+
 .notification-item{
 background:var(--surface2);
 padding:15px;
@@ -771,6 +916,24 @@ font-size:11px;
 font-weight:bold;
 }
 
+.time-report{
+background:var(--surface2);
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+}
+
+.time-report-item{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.time-report-item:last-child{
+border-bottom:none;
+}
+
 @media (max-width: 640px){
 .stats-grid{
 grid-template-columns:repeat(2,1fr);
@@ -784,6 +947,9 @@ padding:15px;
 .recurring-options{
 grid-template-columns:repeat(2,1fr);
 }
+.urgency-options{
+grid-template-columns:repeat(2,1fr);
+}
 .task-actions{
 flex-wrap:wrap;
 }
@@ -794,7 +960,7 @@ flex-wrap:wrap;
 <body data-theme="midnight">
 
 <div class="header">
-<h1>✅ Tasks Ultra Pro Max</h1>
+<h1>✅ Tasks Ultra Pro Elite</h1>
 <div class="header-icons">
 <button onclick="undo()" title="Undo (Ctrl+Z)" id="undoBtn">↶</button>
 <button onclick="redo()" title="Redo (Ctrl+Y)" id="redoBtn">↷</button>
@@ -802,6 +968,7 @@ flex-wrap:wrap;
 🔔
 <span class="notification-badge" id="notificationBadge" style="display:none;"></span>
 </button>
+<button onclick="showTimeReport()" title="Time Report">⏱️</button>
 <button onclick="showStats()" title="Analytics">📊</button>
 <button onclick="showSettings()" title="Settings">⚙️</button>
 </div>
@@ -846,6 +1013,7 @@ flex-wrap:wrap;
 <button class="tab" onclick="switchTab('completed',this)">✅ Done</button>
 <button class="tab" onclick="switchTab('today',this)">📅 Today</button>
 <button class="tab" onclick="switchTab('overdue',this)">⚠️ Overdue</button>
+<button class="tab" onclick="switchTab('critical',this)">🚨 Critical</button>
 </div>
 
 <div class="search-section">
@@ -859,11 +1027,17 @@ flex-wrap:wrap;
 </select>
 </div>
 
+<div class="saved-filters" id="savedFiltersContainer">
+<button class="filter-chip" onclick="createSavedFilter()">+ Save Current Filter</button>
+</div>
+
 <div class="sort-options" id="sortOptions">
 <button class="sort-btn active" onclick="setSortOrder('recent')">Recent</button>
 <button class="sort-btn" onclick="setSortOrder('priority')">Priority</button>
 <button class="sort-btn" onclick="setSortOrder('duedate')">Due Date</button>
 <button class="sort-btn" onclick="setSortOrder('category')">Category</button>
+<button class="sort-btn" onclick="setSortOrder('urgency')">Urgency</button>
+<button class="sort-btn" onclick="setSortOrder('time')">Time Spent</button>
 </div>
 </div>
 
@@ -913,6 +1087,17 @@ flex-wrap:wrap;
 </div>
 
 <div class="form-group">
+<label class="form-label">Urgency Level 🚨</label>
+<div class="urgency-options">
+<div class="urgency-opt" onclick="setUrgency('low')" data-urgency="low">Normal</div>
+<div class="urgency-opt" onclick="setUrgency('medium')" data-urgency="medium">Medium</div>
+<div class="urgency-opt" onclick="setUrgency('high')" data-urgency="high">High</div>
+<div class="urgency-opt critical" onclick="setUrgency('critical')" data-urgency="critical">Critical 🔴</div>
+</div>
+<input type="hidden" id="taskUrgency" value="low">
+</div>
+
+<div class="form-group">
 <label class="form-label">Due Date</label>
 <input type="date" id="taskDue" class="form-input">
 </div>
@@ -926,6 +1111,21 @@ flex-wrap:wrap;
 <div class="recurring-opt" onclick="setRecurring('monthly')" data-recurring="monthly">Monthly</div>
 </div>
 <input type="hidden" id="taskRecurring" value="none">
+</div>
+
+<div class="form-group">
+<label class="form-label">Auto-Complete Setup 🔄</label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+<input type="checkbox" id="taskAutoComplete" style="width:18px;height:18px;accent-color:var(--primary);">
+<span style="font-size:12px;">Auto-mark incomplete after completion</span>
+</label>
+<select id="autoCompleteFreq" class="form-select" style="font-size:13px;">
+<option value="daily">Daily</option>
+<option value="weekly">Weekly</option>
+<option value="monthly">Monthly</option>
+</select>
+</div>
 </div>
 
 <div class="form-group" id="subtaskContainer">
@@ -952,6 +1152,17 @@ flex-wrap:wrap;
 <button class="btn btn-primary" onclick="saveTask()">💾 Save Task</button>
 <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
 
+</div>
+</div>
+
+<!-- TIME REPORT MODAL -->
+<div class="modal" id="timeReportModal">
+<div class="modal-content">
+<div class="modal-header">
+<h2>⏱️ Time Report</h2>
+<button onclick="closeTimeReport()">✕</button>
+</div>
+<div id="timeReportContent"></div>
 </div>
 </div>
 
@@ -997,6 +1208,14 @@ flex-wrap:wrap;
 </div>
 
 <div class="form-group">
+<label class="form-label">Sound Alerts 🔊</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+<input type="checkbox" id="soundAlerts" style="width:18px;height:18px;accent-color:var(--primary);" checked>
+<span style="font-size:12px;">Enable sound notifications for urgent tasks</span>
+</label>
+</div>
+
+<div class="form-group">
 <label class="form-label">Action History</label>
 <div id="historyList" style="max-height:200px;overflow-y:auto;">
 <div class="history-item">No actions yet</div>
@@ -1016,6 +1235,7 @@ flex-wrap:wrap;
 const STORAGE_KEY = 'tasksUltra';
 const THEME_KEY = 'tasksTheme';
 const MAX_HISTORY = 50;
+const SAVED_FILTERS_KEY = 'savedFilters';
 
 const CATEGORY_ICONS = {
   personal: '👤',
@@ -1026,6 +1246,7 @@ const CATEGORY_ICONS = {
 };
 
 const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };
+const URGENCY_ORDER = { critical: 1, high: 2, medium: 3, low: 4 };
 
 // ===== STATE VARIABLES =====
 var tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -1039,19 +1260,245 @@ var subtasksList = [];
 var recurringType = 'none';
 var currentTags = [];
 var reminderTime = '';
+var urgencyLevel = 'low';
+var autoCompleteEnabled = false;
+var autoCompleteFreq = 'daily';
+var savedFilters = JSON.parse(localStorage.getItem(SAVED_FILTERS_KEY)) || [];
+var runningTimers = {};
 
-// FEATURE 6: UNDO/REDO FUNCTIONALITY
-var history = [];
-var historyIndex = -1;
+// ===== FEATURE 11: TIME TRACKING ⏱️ =====
 
-function saveToHistory() {
-  historyIndex++;
-  history = history.slice(0, historyIndex);
-  history.push(JSON.parse(JSON.stringify(tasks)));
-  if (history.length > MAX_HISTORY) history.shift();
-  updateHistoryButtons();
-  updateHistoryList();
+function startTimer(idx) {
+  if (!tasks[idx].timeData) {
+    tasks[idx].timeData = { sessions: [], totalSeconds: 0, currentSessionStart: null };
+  }
+  
+  if (!tasks[idx].timeData.currentSessionStart) {
+    tasks[idx].timeData.currentSessionStart = Date.now();
+    runningTimers[idx] = setInterval(() => updateTimerDisplay(idx), 1000);
+    saveToHistory();
+    showToast('Timer started ⏱️');
+  }
 }
+
+function stopTimer(idx) {
+  if (tasks[idx].timeData && tasks[idx].timeData.currentSessionStart) {
+    const sessionDuration = Math.floor((Date.now() - tasks[idx].timeData.currentSessionStart) / 1000);
+    tasks[idx].timeData.sessions.push({ duration: sessionDuration, date: new Date().toISOString() });
+    tasks[idx].timeData.totalSeconds += sessionDuration;
+    tasks[idx].timeData.currentSessionStart = null;
+    
+    if (runningTimers[idx]) clearInterval(runningTimers[idx]);
+    delete runningTimers[idx];
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    saveToHistory();
+    render();
+    showToast('Timer stopped ⏱️');
+  }
+}
+
+function updateTimerDisplay(idx) {
+  const displayEl = document.querySelector(`[data-timer="${idx}"]`);
+  if (displayEl && tasks[idx].timeData && tasks[idx].timeData.currentSessionStart) {
+    const elapsed = Math.floor((Date.now() - tasks[idx].timeData.currentSessionStart) / 1000);
+    displayEl.textContent = formatTime(tasks[idx].timeData.totalSeconds + elapsed);
+  }
+}
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function getTotalTime(idx) {
+  if (!tasks[idx].timeData) return 0;
+  let total = tasks[idx].timeData.totalSeconds;
+  if (tasks[idx].timeData.currentSessionStart) {
+    total += Math.floor((Date.now() - tasks[idx].timeData.currentSessionStart) / 1000);
+  }
+  return total;
+}
+
+function showTimeReport() {
+  let reportHTML = '<div style="padding:20px 0;">';
+  
+  let totalTimeSpent = 0;
+  tasks.forEach(t => {
+    totalTimeSpent += getTotalTime(tasks.indexOf(t));
+  });
+  
+  reportHTML += `
+    <div class="time-report">
+      <div style="font-weight:bold;font-size:14px;margin-bottom:10px;">📊 Total Time Spent</div>
+      <div style="font-size:24px;font-weight:bold;color:var(--primary);">${formatTime(totalTimeSpent)}</div>
+    </div>
+  `;
+  
+  reportHTML += '<div style="font-weight:bold;font-size:14px;margin-bottom:10px;">📋 Tasks by Time</div>';
+  
+  tasks.filter(t => getTotalTime(tasks.indexOf(t)) > 0)
+    .sort((a, b) => getTotalTime(tasks.indexOf(b)) - getTotalTime(tasks.indexOf(a)))
+    .slice(0, 10)
+    .forEach(t => {
+      const idx = tasks.indexOf(t);
+      const time = getTotalTime(idx);
+      reportHTML += `
+        <div class="time-report-item">
+          <span>${escapeHtml(t.text)}</span>
+          <strong style="color:var(--accent);">${formatTime(time)}</strong>
+        </div>
+      `;
+    });
+  
+  reportHTML += '</div>';
+  
+  document.getElementById('timeReportContent').innerHTML = reportHTML;
+  document.getElementById('timeReportModal').classList.add('active');
+}
+
+function closeTimeReport() {
+  document.getElementById('timeReportModal').classList.remove('active');
+}
+
+// ===== FEATURE 14: URGENT ALERTS & NOTIFICATIONS 🚨 =====
+
+function setUrgency(level) {
+  urgencyLevel = level;
+  document.querySelectorAll('.urgency-opt').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  document.querySelector(`[data-urgency="${level}"]`).classList.add('selected');
+  document.getElementById('taskUrgency').value = level;
+}
+
+function playAlertSound() {
+  if (document.getElementById('soundAlerts').checked) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  }
+}
+
+function checkCriticalTasks() {
+  const critical = tasks.filter(t => !t.done && t.urgency === 'critical');
+  if (critical.length > 0) {
+    critical.forEach(() => playAlertSound());
+    showToast('🚨 Critical tasks found!', true);
+  }
+}
+
+// ===== FEATURE 17: AUTO-COMPLETION 🔄 =====
+
+function setupAutoCompletion(task) {
+  if (task.autoComplete && task.autoCompleteFreq) {
+    const today = new Date();
+    const nextReset = new Date(today);
+    
+    if (task.autoCompleteFreq === 'daily') nextReset.setDate(nextReset.getDate() + 1);
+    else if (task.autoCompleteFreq === 'weekly') nextReset.setDate(nextReset.getDate() + 7);
+    else if (task.autoCompleteFreq === 'monthly') nextReset.setMonth(nextReset.getMonth() + 1);
+    
+    task.nextAutoComplete = nextReset.toISOString();
+  }
+}
+
+function processAutoCompletion() {
+  const now = new Date().toISOString();
+  tasks.forEach(task => {
+    if (task.autoComplete && task.nextAutoComplete && task.nextAutoComplete <= now && task.done) {
+      task.done = false;
+      setupAutoCompletion(task);
+      showToast(`🔄 ${task.text} reset for today!`);
+    }
+  });
+}
+
+// Run auto-completion check every 5 minutes
+setInterval(() => {
+  processAutoCompletion();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}, 300000);
+
+// ===== FEATURE 19: SAVED FILTERS 🔎 =====
+
+function createSavedFilter() {
+  const name = prompt('Filter name:', `Filter ${savedFilters.length + 1}`);
+  if (name) {
+    const filter = {
+      id: Date.now(),
+      name: name,
+      priority: currentPriorityFilter,
+      sort: currentSort,
+      tab: currentTab,
+      search: searchQuery
+    };
+    savedFilters.push(filter);
+    localStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(savedFilters));
+    renderSavedFilters();
+    showToast(`Filter "${name}" saved! 🔎`);
+  }
+}
+
+function applySavedFilter(filterId) {
+  const filter = savedFilters.find(f => f.id === filterId);
+  if (filter) {
+    currentPriorityFilter = filter.priority || '';
+    currentSort = filter.sort || 'recent';
+    currentTab = filter.tab || 'all';
+    searchQuery = filter.search || '';
+    
+    document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll(`.tab[onclick*="${filter.tab}"]`).forEach(btn => btn.classList.add('active'));
+    
+    renderSavedFilters();
+    render();
+    showToast(`Filter "${filter.name}" applied! ✅`);
+  }
+}
+
+function deleteSavedFilter(filterId) {
+  savedFilters = savedFilters.filter(f => f.id !== filterId);
+  localStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(savedFilters));
+  renderSavedFilters();
+  showToast('Filter deleted! 🗑️');
+}
+
+function renderSavedFilters() {
+  const container = document.getElementById('savedFiltersContainer');
+  let html = '<button class="filter-chip" onclick="createSavedFilter()">+ Save Filter</button>';
+  
+  savedFilters.forEach(filter => {
+    html += `
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="filter-chip" onclick="applySavedFilter(${filter.id})" title="${filter.name}">
+          📌 ${filter.name}
+        </button>
+        <button style="background:none;border:none;color:var(--danger);cursor:pointer;padding:4px;font-size:12px;" onclick="deleteSavedFilter(${filter.id})">✕</button>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// ===== OTHER FEATURES FROM PREVIOUS VERSION =====
 
 function undo() {
   if (historyIndex > 0) {
@@ -1073,6 +1520,18 @@ function redo() {
     updateNotificationBadge();
     showToast('Redo! ↷');
   }
+}
+
+var history = [];
+var historyIndex = -1;
+
+function saveToHistory() {
+  historyIndex++;
+  history = history.slice(0, historyIndex);
+  history.push(JSON.parse(JSON.stringify(tasks)));
+  if (history.length > MAX_HISTORY) history.shift();
+  updateHistoryButtons();
+  updateHistoryList();
 }
 
 function updateHistoryButtons() {
@@ -1100,7 +1559,6 @@ function jumpToHistory(idx) {
   showToast('Jumped to snapshot ' + (idx + 1));
 }
 
-// FEATURE 7: CUSTOM TAGS
 function addTag(event) {
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -1129,110 +1587,6 @@ function renderTags() {
   container.innerHTML = tagsHTML + '<input type="text" class="tag-input" id="tagInput" placeholder="Type tag & press Enter..." onkeypress="addTag(event)">';
 }
 
-// FEATURE 8: REMINDERS
-function setReminder(time) {
-  reminderTime = time;
-}
-
-function checkReminders() {
-  const now = new Date();
-  const currentTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  
-  tasks.forEach(task => {
-    if (task.reminder === currentTime && !task.reminderShown) {
-      if (Notification.permission === 'granted') {
-        new Notification('Task Reminder! ⏰', {
-          body: task.text,
-          icon: '📌'
-        });
-      }
-      task.reminderShown = true;
-    }
-  });
-}
-
-// Request notification permission
-if ('Notification' in window && Notification.permission === 'default') {
-  Notification.requestPermission();
-}
-
-// Check reminders every minute
-setInterval(checkReminders, 60000);
-
-// FEATURE 9: SMART SEARCH & FILTERING
-function debounceSearch(query) {
-  clearTimeout(searchTimeout);
-  searchQuery = query;
-  searchTimeout = setTimeout(() => {
-    searchTasks(query);
-  }, 300);
-}
-
-function setSortOrder(order) {
-  currentSort = order;
-  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
-  render();
-}
-
-function getSortedTasks(taskList) {
-  let sorted = [...taskList];
-  
-  if (currentSort === 'priority') {
-    sorted.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  } else if (currentSort === 'duedate') {
-    sorted.sort((a, b) => {
-      if (!a.due) return 1;
-      if (!b.due) return -1;
-      return new Date(a.due) - new Date(b.due);
-    });
-  } else if (currentSort === 'category') {
-    sorted.sort((a, b) => a.category.localeCompare(b.category));
-  }
-  
-  return sorted;
-}
-
-function filterByPriority(priority) {
-  currentPriorityFilter = priority;
-  render();
-}
-
-// FEATURE 10: CLONE TASK & TEMPLATES
-function cloneTask(idx) {
-  const original = tasks[idx];
-  const cloned = JSON.parse(JSON.stringify(original));
-  cloned.text = cloned.text + ' (Copy)';
-  cloned.done = false;
-  tasks.unshift(cloned);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  saveToHistory();
-  render();
-  updateNotificationBadge();
-  showToast('Task cloned! 📋');
-}
-
-function createTemplate(idx) {
-  const task = tasks[idx];
-  const templateData = {
-    name: prompt('Template name:', task.text),
-    category: task.category,
-    priority: task.priority,
-    desc: task.desc,
-    recurring: task.recurring,
-    subtasks: task.subtasks,
-    tags: task.tags
-  };
-  
-  if (templateData.name) {
-    let templates = JSON.parse(localStorage.getItem('templates')) || [];
-    templates.push(templateData);
-    localStorage.setItem('templates', JSON.stringify(templates));
-    showToast('Template saved! 📋');
-  }
-}
-
-// OTHER FEATURES FROM PREVIOUS VERSION
 function setRecurring(type) {
   recurringType = type;
   document.querySelectorAll('.recurring-opt').forEach(opt => {
@@ -1282,6 +1636,48 @@ function toggleTaskSubtask(taskIdx, subtaskIdx) {
   render();
 }
 
+function debounceSearch(query) {
+  clearTimeout(searchTimeout);
+  searchQuery = query;
+  searchTimeout = setTimeout(() => {
+    searchTasks(query);
+  }, 300);
+}
+
+function setSortOrder(order) {
+  currentSort = order;
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function getSortedTasks(taskList) {
+  let sorted = [...taskList];
+  
+  if (currentSort === 'priority') {
+    sorted.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  } else if (currentSort === 'urgency') {
+    sorted.sort((a, b) => (URGENCY_ORDER[a.urgency] || 4) - (URGENCY_ORDER[b.urgency] || 4));
+  } else if (currentSort === 'duedate') {
+    sorted.sort((a, b) => {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return new Date(a.due) - new Date(b.due);
+    });
+  } else if (currentSort === 'time') {
+    sorted.sort((a, b) => getTotalTime(tasks.indexOf(b)) - getTotalTime(tasks.indexOf(a)));
+  } else if (currentSort === 'category') {
+    sorted.sort((a, b) => a.category.localeCompare(b.category));
+  }
+  
+  return sorted;
+}
+
+function filterByPriority(priority) {
+  currentPriorityFilter = priority;
+  render();
+}
+
 function updateNotificationBadge() {
   const today = new Date().toISOString().split('T')[0];
   const count = tasks.filter(t => 
@@ -1301,45 +1697,53 @@ function showNotifications() {
   const notificationsList = document.getElementById('notificationsList');
   const today = new Date().toISOString().split('T')[0];
   
-  const overdueCount = tasks.filter(t => !t.done && t.due && t.due < today).length;
-  const todayCount = tasks.filter(t => !t.done && t.due === today).length;
-  
   const overdueTasks = tasks.filter(t => !t.done && t.due && t.due < today).slice(0, 5);
   const todayTasks = tasks.filter(t => !t.done && t.due === today).slice(0, 5);
+  const criticalTasks = tasks.filter(t => !t.done && t.urgency === 'critical').slice(0, 5);
   
   let html = '';
   
+  if (criticalTasks.length > 0) {
+    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;">🚨 Critical Tasks (' + criticalTasks.length + ')</strong>';
+    criticalTasks.forEach(t => {
+      html += `
+        <div class="notification-item" style="border-left-color:var(--critical);background:rgba(255,23,68,0.1);">
+          <div>
+            <div style="font-weight:bold;font-size:13px;color:var(--critical);">${escapeHtml(t.text)}</div>
+          </div>
+          <span style="font-size:12px;color:var(--critical);font-weight:bold;">🔴</span>
+        </div>
+      `;
+    });
+  }
+  
   if (overdueTasks.length > 0) {
-    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;">⚠️ Overdue Tasks (' + overdueCount + ')</strong>';
+    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;margin-top:15px;">⚠️ Overdue (' + overdueTasks.length + ')</strong>';
     overdueTasks.forEach(t => {
       html += `
         <div class="notification-item overdue">
           <div>
             <div style="font-weight:bold;font-size:13px;">${escapeHtml(t.text)}</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:4px;">${t.due}</div>
           </div>
-          <span style="font-size:12px;color:var(--danger);">DUE</span>
         </div>
       `;
     });
   }
   
   if (todayTasks.length > 0) {
-    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;margin-top:15px;">📅 Due Today (' + todayCount + ')</strong>';
+    html += '<strong style="font-size:14px;margin-bottom:10px;display:block;margin-top:15px;">📅 Today (' + todayTasks.length + ')</strong>';
     todayTasks.forEach(t => {
       html += `
         <div class="notification-item today">
           <div>
             <div style="font-weight:bold;font-size:13px;">${escapeHtml(t.text)}</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:4px;">Today</div>
           </div>
-          <span style="font-size:12px;color:var(--accent);">TODAY</span>
         </div>
       `;
     });
   }
   
-  if (overdueTasks.length === 0 && todayTasks.length === 0) {
+  if (overdueTasks.length === 0 && todayTasks.length === 0 && criticalTasks.length === 0) {
     html = `
       <div class="empty">
         <div class="icon">✨</div>
@@ -1362,91 +1766,43 @@ function showStats() {
   const pending = total - completed;
   const today = new Date().toISOString().split('T')[0];
   const overdue = tasks.filter(t => !t.done && t.due && t.due < today).length;
-  
-  const byCategory = {};
-  tasks.forEach(t => {
-    byCategory[t.category] = (byCategory[t.category] || 0) + 1;
-  });
-  
-  const byPriority = {};
-  tasks.forEach(t => {
-    byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;
-  });
-  
-  const recurringCount = tasks.filter(t => t.recurring && t.recurring !== 'none').length;
-  const withSubtasks = tasks.filter(t => t.subtasks && t.subtasks.length > 0).length;
-  const withTags = tasks.filter(t => t.tags && t.tags.length > 0).length;
-  const withReminders = tasks.filter(t => t.reminder).length;
+  const critical = tasks.filter(t => !t.done && t.urgency === 'critical').length;
   
   let analyticsHTML = `
     <div style="padding:20px 0;">
-      
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
         <div style="background:var(--surface2);padding:15px;border-radius:12px;">
-          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">📊 Overall</div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">📊 Overview</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
             <span>Total</span>
-            <strong style="color:var(--primary);">${total}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <span>Completed ✅</span>
-            <strong style="color:var(--accent);">${completed}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <span>Pending ⏳</span>
-            <strong style="color:var(--warning);">${pending}</strong>
+            <strong>${total}</strong>
           </div>
           <div style="display:flex;justify-content:space-between;padding:8px 0;">
-            <span>Overdue ⚠️</span>
-            <strong style="color:var(--danger);">${overdue}</strong>
+            <span>Completed</span>
+            <strong>${completed}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Pending</span>
+            <strong>${pending}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Critical 🚨</span>
+            <strong style="color:var(--critical);">${critical}</strong>
           </div>
         </div>
         
         <div style="background:var(--surface2);padding:15px;border-radius:12px;">
-          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">🎯 Advanced</div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <span>Recurring 🔄</span>
-            <strong style="color:var(--primary);">${recurringCount}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <span>Subtasks ✓</span>
-            <strong style="color:var(--accent);">${withSubtasks}</strong>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-            <span>Tags 🏷️</span>
-            <strong style="color:var(--primary);">${withTags}</strong>
+          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">⏱️ Time Stats</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Total Tracked</span>
+            <strong>${formatTime(tasks.reduce((a,t,i) => a + getTotalTime(i), 0))}</strong>
           </div>
           <div style="display:flex;justify-content:space-between;padding:8px 0;">
-            <span>Reminders ⏰</span>
-            <strong style="color:var(--accent);">${withReminders}</strong>
+            <span>Avg per Task</span>
+            <strong>${tasks.length > 0 ? formatTime(Math.floor(tasks.reduce((a,t,i) => a + getTotalTime(i), 0) / tasks.length)) : '0s'}</strong>
           </div>
         </div>
       </div>
-      
-      <div style="margin-top:20px;">
-        <strong style="font-size:14px;">📂 By Category</strong>
-        <div style="margin-top:10px;">
-          ${Object.entries(byCategory).map(([cat, count]) => `
-            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
-              <span>${CATEGORY_ICONS[cat]} ${cat}</span>
-              <span style="font-weight:bold;">${count}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div style="margin-top:20px;">
-        <strong style="font-size:14px;">🎯 By Priority</strong>
-        <div style="margin-top:10px;">
-          ${Object.entries(byPriority).map(([pri, count]) => `
-            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
-              <span class="tag tag-${pri}">${pri.toUpperCase()}</span>
-              <span style="font-weight:bold;">${count}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
     </div>
   `;
   
@@ -1467,6 +1823,27 @@ function escapeHtml(text) {
 function renderTaskHTML(task, idx, today) {
   const icon = CATEGORY_ICONS[task.category] || '📌';
   const overdue = !task.done && task.due && task.due < today;
+  const totalTime = getTotalTime(idx);
+  const isRunning = runningTimers[idx] !== undefined;
+  
+  let timerHTML = `
+    <div class="timer-section">
+      <span class="timer-display" data-timer="${idx}">${formatTime(totalTime)}</span>
+      <button class="timer-btn" onclick="startTimer(${idx})" style="display:${isRunning ? 'none' : 'block'};">▶ Start</button>
+      <button class="timer-btn" style="background:var(--danger);display:${isRunning ? 'block' : 'none'};" onclick="stopTimer(${idx})">⏹ Stop</button>
+    </div>
+  `;
+  
+  let urgencyTag = '';
+  if (task.urgency && task.urgency !== 'low') {
+    const urgencyEmoji = { critical: '🔴', high: '🟥', medium: '🟧' }[task.urgency] || '🟩';
+    urgencyTag = `<span class="tag tag-urgent-${task.urgency}">${urgencyEmoji} ${task.urgency}</span>`;
+  }
+  
+  let autoCompleteTag = '';
+  if (task.autoComplete) {
+    autoCompleteTag = `<span class="auto-complete-badge">🔄 Auto-Reset</span>`;
+  }
   
   let subtasksHTML = '';
   if (task.subtasks && task.subtasks.length > 0) {
@@ -1489,13 +1866,8 @@ function renderTaskHTML(task, idx, today) {
     tagsHTML = task.tags.map(tag => `<span class="tag tag-custom">#${tag}</span>`).join('');
   }
   
-  let reminderHTML = '';
-  if (task.reminder) {
-    reminderHTML = `<span class="reminder-set">⏰ ${task.reminder}</span>`;
-  }
-  
   return `
-    <div class="task ${task.done ? 'completed' : ''}">
+    <div class="task ${task.done ? 'completed' : ''} urgent-${task.urgency || 'low'}">
       <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onchange="toggle(${idx})">
       <div class="task-content">
         <div class="task-text">${escapeHtml(task.text)}</div>
@@ -1504,15 +1876,14 @@ function renderTaskHTML(task, idx, today) {
           <span class="tag tag-${task.priority}">${task.priority}</span>
           <span class="tag">${icon} ${task.category}</span>
           ${task.due ? `<span class="tag ${overdue ? 'tag-overdue':''}">${task.due}</span>` : ''}
-          ${task.recurring && task.recurring !== 'none' ? `<span class="tag tag-recurring">🔄 ${task.recurring}</span>` : ''}
+          ${urgencyTag}
+          ${autoCompleteTag}
           ${tagsHTML}
-          ${reminderHTML}
         </div>
+        ${timerHTML}
         ${subtasksHTML}
         <div class="task-actions">
           <button onclick="editTask(${idx})">Edit</button>
-          <button onclick="cloneTask(${idx})">📋 Clone</button>
-          <button onclick="createTemplate(${idx})">📄 Template</button>
           <button class="btn-del" onclick="deleteTask(${idx})">Delete</button>
         </div>
       </div>
@@ -1569,12 +1940,10 @@ function importData() {
           saveToHistory();
           render();
           updateNotificationBadge();
-          showToast('Tasks imported successfully!');
-        } else {
-          alert('Invalid JSON format');
+          showToast('Tasks imported!');
         }
       } catch (err) {
-        alert('Error reading file: ' + err.message);
+        alert('Error: ' + err.message);
       }
     };
     reader.readAsText(file);
@@ -1584,10 +1953,10 @@ function importData() {
 
 function clearAll() {
   if (tasks.length === 0) {
-    alert('No tasks to clear!');
+    alert('No tasks!');
     return;
   }
-  if (confirm('Delete ALL tasks? This cannot be undone!')) {
+  if (confirm('Delete ALL? Cannot undo!')) {
     tasks = [];
     history = [];
     historyIndex = -1;
@@ -1596,16 +1965,19 @@ function clearAll() {
     updateNotificationBadge();
     updateHistoryButtons();
     closeSettings();
-    showToast('All tasks cleared!');
+    showToast('All cleared!');
   }
 }
 
 function init() {
   loadTheme();
+  renderSavedFilters();
   saveToHistory();
   render();
   updateNotificationBadge();
   updateHistoryButtons();
+  checkCriticalTasks();
+  processAutoCompletion();
 }
 
 init();
@@ -1624,6 +1996,8 @@ function render() {
   } else if (currentTab === 'overdue') {
     const today = new Date().toISOString().split('T')[0];
     filtered = tasks.filter(t => !t.done && t.due && t.due < today);
+  } else if (currentTab === 'critical') {
+    filtered = tasks.filter(t => !t.done && t.urgency === 'critical');
   }
 
   if (currentPriorityFilter) {
@@ -1650,7 +2024,7 @@ function render() {
     container.innerHTML = `
       <div class="empty">
         <div class="icon">📝</div>
-        <div class="text">No tasks yet!<br>Tap + to add</div>
+        <div class="text">No tasks yet!</div>
       </div>
     `;
     return;
@@ -1668,6 +2042,9 @@ function openAddModal() {
   recurringType = 'none';
   currentTags = [];
   reminderTime = '';
+  urgencyLevel = 'low';
+  autoCompleteEnabled = false;
+  
   document.getElementById('addTitle').innerText = 'New Task';
   document.getElementById('taskName').value = '';
   document.getElementById('taskDesc').value = '';
@@ -1676,12 +2053,18 @@ function openAddModal() {
   document.getElementById('taskDue').value = '';
   document.getElementById('taskRecurring').value = 'none';
   document.getElementById('taskReminder').value = '';
+  document.getElementById('taskUrgency').value = 'low';
+  document.getElementById('taskAutoComplete').checked = false;
   document.getElementById('subtaskInput').value = '';
   document.getElementById('tagInput').value = '';
+  
   renderSubtasks();
   renderTags();
   document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
   document.querySelector('[data-recurring="none"]').classList.add('selected');
+  document.querySelectorAll('.urgency-opt').forEach(opt => opt.classList.remove('selected'));
+  document.querySelector('[data-urgency="low"]').classList.add('selected');
+  
   document.getElementById('addModal').classList.add('active');
 }
 
@@ -1712,12 +2095,19 @@ function saveTask() {
     priority: document.getElementById('taskPriority').value,
     due: dueDate,
     recurring: document.getElementById('taskRecurring').value,
+    urgency: document.getElementById('taskUrgency').value,
     subtasks: subtasksList,
     tags: currentTags,
     reminder: document.getElementById('taskReminder').value,
+    autoComplete: document.getElementById('taskAutoComplete').checked,
+    autoCompleteFreq: document.getElementById('autoCompleteFreq').value,
     done: false,
     createdAt: new Date().toISOString()
   };
+
+  if (task.autoComplete) {
+    setupAutoCompletion(task);
+  }
 
   if (editIndex !== null) {
     task.done = tasks[editIndex].done;
@@ -1732,6 +2122,7 @@ function saveTask() {
   updateNotificationBadge();
   closeAddModal();
   showToast('Task Saved! ✅');
+  checkCriticalTasks();
 }
 
 function toggle(i) {
@@ -1750,6 +2141,8 @@ function editTask(i) {
   recurringType = t.recurring || 'none';
   currentTags = t.tags ? [...t.tags] : [];
   reminderTime = t.reminder || '';
+  urgencyLevel = t.urgency || 'low';
+  autoCompleteEnabled = t.autoComplete || false;
 
   document.getElementById('addTitle').innerText = 'Edit Task';
   document.getElementById('taskName').value = t.text;
@@ -1759,18 +2152,26 @@ function editTask(i) {
   document.getElementById('taskDue').value = t.due || '';
   document.getElementById('taskRecurring').value = t.recurring || 'none';
   document.getElementById('taskReminder').value = t.reminder || '';
+  document.getElementById('taskUrgency').value = t.urgency || 'low';
+  document.getElementById('taskAutoComplete').checked = t.autoComplete || false;
+  document.getElementById('autoCompleteFreq').value = t.autoCompleteFreq || 'daily';
   document.getElementById('subtaskInput').value = '';
 
   renderSubtasks();
   renderTags();
   document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
   document.querySelector(`[data-recurring="${t.recurring || 'none'}"]`).classList.add('selected');
+  document.querySelectorAll('.urgency-opt').forEach(opt => opt.classList.remove('selected'));
+  document.querySelector(`[data-urgency="${t.urgency || 'low'}"]`).classList.add('selected');
 
   document.getElementById('addModal').classList.add('active');
 }
 
 function deleteTask(i) {
   if (confirm('Delete this task?')) {
+    if (runningTimers[i]) clearInterval(runningTimers[i]);
+    delete runningTimers[i];
+    
     tasks.splice(i, 1);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     saveToHistory();
@@ -1808,7 +2209,7 @@ function searchTasks(query) {
     container.innerHTML = `
       <div class="empty">
         <div class="icon">🔍</div>
-        <div class="text">No matching tasks</div>
+        <div class="text">No matches</div>
       </div>
     `;
     return;
@@ -1822,16 +2223,18 @@ function searchTasks(query) {
   }).join('');
 }
 
-function showToast(msg) {
+function showToast(msg, critical = false) {
   var toast = document.getElementById('toast');
   toast.innerText = msg;
   toast.classList.add('show');
+  if (critical) toast.classList.add('critical');
+  else toast.classList.remove('critical');
+  
   setTimeout(() => {
     toast.classList.remove('show');
   }, 2000);
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key === 'z') {
     e.preventDefault();
@@ -1846,6 +2249,7 @@ document.addEventListener('keydown', (e) => {
     closeSettings();
     closeNotifications();
     closeStats();
+    closeTimeReport();
   }
 });
 
