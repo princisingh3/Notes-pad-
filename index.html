@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks Ultra Pro Max Advanced</title>
+<title>Tasks Ultra Pro Max Advanced Pro</title>
 
 <style>
 *{
@@ -92,6 +92,11 @@ position:relative;
 
 .header button:hover{
 background:rgba(255,255,255,0.3);
+}
+
+.header button:disabled{
+opacity:0.5;
+cursor:not-allowed;
 }
 
 .notification-badge{
@@ -371,6 +376,12 @@ background:var(--primary);
 color:#fff;
 }
 
+.tag-custom{
+background:rgba(102,126,234,0.3);
+color:var(--primary);
+border:1px solid var(--primary);
+}
+
 .subtask-list{
 margin-top:10px;
 padding-left:15px;
@@ -409,6 +420,7 @@ padding:0 4px;
 .task-actions{
 display:flex;
 gap:8px;
+flex-wrap:wrap;
 }
 
 .task-actions button{
@@ -568,6 +580,12 @@ background:var(--danger);
 color:#fff;
 }
 
+.btn-small{
+padding:8px 12px;
+font-size:13px;
+margin-top:5px;
+}
+
 .theme-grid{
 display:grid;
 grid-template-columns:repeat(4,1fr);
@@ -691,34 +709,66 @@ border-left:4px solid var(--danger);
 border-left:4px solid var(--accent);
 }
 
-.analytics-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-margin-top:15px;
-}
-
-.analytics-item{
-background:var(--surface2);
-padding:15px;
-border-radius:12px;
-}
-
-.analytics-title{
-font-weight:bold;
-margin-bottom:10px;
-color:var(--accent);
-}
-
-.analytics-stat{
+.tag-input-container{
 display:flex;
-justify-content:space-between;
-padding:8px 0;
-border-bottom:1px solid rgba(255,255,255,0.1);
+gap:8px;
+flex-wrap:wrap;
+margin-top:10px;
+padding:10px;
+background:var(--surface2);
+border-radius:10px;
+min-height:40px;
 }
 
-.analytics-stat:last-child{
-border-bottom:none;
+.tag-item{
+display:flex;
+gap:6px;
+align-items:center;
+padding:6px 12px;
+background:var(--primary);
+color:#fff;
+border-radius:20px;
+font-size:12px;
+}
+
+.tag-item button{
+background:none;
+border:none;
+color:#fff;
+cursor:pointer;
+font-size:14px;
+padding:0;
+}
+
+.tag-input{
+flex:1;
+border:none;
+background:transparent;
+color:#fff;
+font-size:12px;
+min-width:80px;
+outline:none;
+}
+
+.tag-input::placeholder{
+color:var(--text2);
+}
+
+.history-item{
+background:var(--surface2);
+padding:12px;
+border-radius:10px;
+margin-bottom:8px;
+font-size:12px;
+}
+
+.reminder-set{
+background:var(--accent);
+color:#000;
+padding:6px 12px;
+border-radius:20px;
+font-size:11px;
+font-weight:bold;
 }
 
 @media (max-width: 640px){
@@ -734,8 +784,8 @@ padding:15px;
 .recurring-options{
 grid-template-columns:repeat(2,1fr);
 }
-.analytics-grid{
-grid-template-columns:1fr;
+.task-actions{
+flex-wrap:wrap;
 }
 }
 </style>
@@ -746,6 +796,8 @@ grid-template-columns:1fr;
 <div class="header">
 <h1>✅ Tasks Ultra Pro Max</h1>
 <div class="header-icons">
+<button onclick="undo()" title="Undo (Ctrl+Z)" id="undoBtn">↶</button>
+<button onclick="redo()" title="Redo (Ctrl+Y)" id="redoBtn">↷</button>
 <button onclick="showNotifications()" title="Notifications" style="position:relative;">
 🔔
 <span class="notification-badge" id="notificationBadge" style="display:none;"></span>
@@ -885,6 +937,18 @@ grid-template-columns:1fr;
 </div>
 </div>
 
+<div class="form-group">
+<label class="form-label">Custom Tags 🏷️</label>
+<div class="tag-input-container" id="tagsContainer">
+<input type="text" class="tag-input" id="tagInput" placeholder="Type tag & press Enter..." onkeypress="addTag(event)">
+</div>
+</div>
+
+<div class="form-group">
+<label class="form-label">Reminder ⏰</label>
+<input type="time" id="taskReminder" class="form-input">
+</div>
+
 <button class="btn btn-primary" onclick="saveTask()">💾 Save Task</button>
 <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
 
@@ -909,9 +973,7 @@ grid-template-columns:1fr;
 <h2>📊 Analytics & Statistics</h2>
 <button onclick="closeStats()">✕</button>
 </div>
-
 <div id="analyticsContent"></div>
-
 </div>
 </div>
 
@@ -934,6 +996,13 @@ grid-template-columns:1fr;
 </div>
 </div>
 
+<div class="form-group">
+<label class="form-label">Action History</label>
+<div id="historyList" style="max-height:200px;overflow-y:auto;">
+<div class="history-item">No actions yet</div>
+</div>
+</div>
+
 <button class="btn btn-primary" onclick="exportData()">📤 Export Data</button>
 <button class="btn btn-primary" onclick="importData()">📥 Import Data</button>
 <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear All Tasks</button>
@@ -946,6 +1015,7 @@ grid-template-columns:1fr;
 // ===== CONSTANTS =====
 const STORAGE_KEY = 'tasksUltra';
 const THEME_KEY = 'tasksTheme';
+const MAX_HISTORY = 50;
 
 const CATEGORY_ICONS = {
   personal: '👤',
@@ -967,9 +1037,202 @@ var searchTimeout;
 var currentPriorityFilter = '';
 var subtasksList = [];
 var recurringType = 'none';
+var currentTags = [];
+var reminderTime = '';
 
-// ===== FEATURE 1: RECURRING TASKS 📅 =====
+// FEATURE 6: UNDO/REDO FUNCTIONALITY
+var history = [];
+var historyIndex = -1;
 
+function saveToHistory() {
+  historyIndex++;
+  history = history.slice(0, historyIndex);
+  history.push(JSON.parse(JSON.stringify(tasks)));
+  if (history.length > MAX_HISTORY) history.shift();
+  updateHistoryButtons();
+  updateHistoryList();
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    historyIndex--;
+    tasks = JSON.parse(JSON.stringify(history[historyIndex]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    render();
+    updateNotificationBadge();
+    showToast('Undo! ↶');
+  }
+}
+
+function redo() {
+  if (historyIndex < history.length - 1) {
+    historyIndex++;
+    tasks = JSON.parse(JSON.stringify(history[historyIndex]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    render();
+    updateNotificationBadge();
+    showToast('Redo! ↷');
+  }
+}
+
+function updateHistoryButtons() {
+  document.getElementById('undoBtn').disabled = historyIndex <= 0;
+  document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+}
+
+function updateHistoryList() {
+  let historyHTML = history.slice(Math.max(0, history.length - 5)).reverse().map((h, i) => {
+    const idx = history.length - 1 - i;
+    const isActive = idx === historyIndex;
+    return `<div class="history-item" style="background:${isActive ? 'var(--primary)' : 'var(--surface2)'};cursor:pointer;" onclick="jumpToHistory(${idx})">
+      Snapshot ${idx + 1} - ${h.length} tasks
+    </div>`;
+  }).join('');
+  document.getElementById('historyList').innerHTML = historyHTML || '<div class="history-item">No history</div>';
+}
+
+function jumpToHistory(idx) {
+  historyIndex = idx;
+  tasks = JSON.parse(JSON.stringify(history[historyIndex]));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  render();
+  updateHistoryButtons();
+  showToast('Jumped to snapshot ' + (idx + 1));
+}
+
+// FEATURE 7: CUSTOM TAGS
+function addTag(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const tag = document.getElementById('tagInput').value.trim();
+    if (tag && !currentTags.includes(tag)) {
+      currentTags.push(tag);
+      renderTags();
+      document.getElementById('tagInput').value = '';
+    }
+  }
+}
+
+function removeTag(tag) {
+  currentTags = currentTags.filter(t => t !== tag);
+  renderTags();
+}
+
+function renderTags() {
+  const container = document.getElementById('tagsContainer');
+  const tagsHTML = currentTags.map(tag => `
+    <div class="tag-item">
+      ${tag}
+      <button onclick="removeTag('${tag}')">✕</button>
+    </div>
+  `).join('');
+  container.innerHTML = tagsHTML + '<input type="text" class="tag-input" id="tagInput" placeholder="Type tag & press Enter..." onkeypress="addTag(event)">';
+}
+
+// FEATURE 8: REMINDERS
+function setReminder(time) {
+  reminderTime = time;
+}
+
+function checkReminders() {
+  const now = new Date();
+  const currentTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  
+  tasks.forEach(task => {
+    if (task.reminder === currentTime && !task.reminderShown) {
+      if (Notification.permission === 'granted') {
+        new Notification('Task Reminder! ⏰', {
+          body: task.text,
+          icon: '📌'
+        });
+      }
+      task.reminderShown = true;
+    }
+  });
+}
+
+// Request notification permission
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// Check reminders every minute
+setInterval(checkReminders, 60000);
+
+// FEATURE 9: SMART SEARCH & FILTERING
+function debounceSearch(query) {
+  clearTimeout(searchTimeout);
+  searchQuery = query;
+  searchTimeout = setTimeout(() => {
+    searchTasks(query);
+  }, 300);
+}
+
+function setSortOrder(order) {
+  currentSort = order;
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function getSortedTasks(taskList) {
+  let sorted = [...taskList];
+  
+  if (currentSort === 'priority') {
+    sorted.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  } else if (currentSort === 'duedate') {
+    sorted.sort((a, b) => {
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return new Date(a.due) - new Date(b.due);
+    });
+  } else if (currentSort === 'category') {
+    sorted.sort((a, b) => a.category.localeCompare(b.category));
+  }
+  
+  return sorted;
+}
+
+function filterByPriority(priority) {
+  currentPriorityFilter = priority;
+  render();
+}
+
+// FEATURE 10: CLONE TASK & TEMPLATES
+function cloneTask(idx) {
+  const original = tasks[idx];
+  const cloned = JSON.parse(JSON.stringify(original));
+  cloned.text = cloned.text + ' (Copy)';
+  cloned.done = false;
+  tasks.unshift(cloned);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  saveToHistory();
+  render();
+  updateNotificationBadge();
+  showToast('Task cloned! 📋');
+}
+
+function createTemplate(idx) {
+  const task = tasks[idx];
+  const templateData = {
+    name: prompt('Template name:', task.text),
+    category: task.category,
+    priority: task.priority,
+    desc: task.desc,
+    recurring: task.recurring,
+    subtasks: task.subtasks,
+    tags: task.tags
+  };
+  
+  if (templateData.name) {
+    let templates = JSON.parse(localStorage.getItem('templates')) || [];
+    templates.push(templateData);
+    localStorage.setItem('templates', JSON.stringify(templates));
+    showToast('Template saved! 📋');
+  }
+}
+
+// OTHER FEATURES FROM PREVIOUS VERSION
 function setRecurring(type) {
   recurringType = type;
   document.querySelectorAll('.recurring-opt').forEach(opt => {
@@ -978,8 +1241,6 @@ function setRecurring(type) {
   document.querySelector(`[data-recurring="${type}"]`).classList.add('selected');
   document.getElementById('taskRecurring').value = type;
 }
-
-// ===== FEATURE 2: SUBTASKS SUPPORT ✅ =====
 
 function addSubtask() {
   const input = document.getElementById('subtaskInput');
@@ -1020,146 +1281,6 @@ function toggleTaskSubtask(taskIdx, subtaskIdx) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   render();
 }
-
-// ===== FEATURE 3: ADVANCED SORTING & FILTERING 🔽 =====
-
-function debounceSearch(query) {
-  clearTimeout(searchTimeout);
-  searchQuery = query;
-  searchTimeout = setTimeout(() => {
-    searchTasks(query);
-  }, 300);
-}
-
-function setSortOrder(order) {
-  currentSort = order;
-  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
-  render();
-}
-
-function getSortedTasks(taskList) {
-  let sorted = [...taskList];
-  
-  if (currentSort === 'priority') {
-    sorted.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  } else if (currentSort === 'duedate') {
-    sorted.sort((a, b) => {
-      if (!a.due) return 1;
-      if (!b.due) return -1;
-      return new Date(a.due) - new Date(b.due);
-    });
-  } else if (currentSort === 'category') {
-    sorted.sort((a, b) => a.category.localeCompare(b.category));
-  }
-  
-  return sorted;
-}
-
-function filterByPriority(priority) {
-  currentPriorityFilter = priority;
-  render();
-}
-
-// ===== FEATURE 4: ANALYTICS/STATISTICS 📊 =====
-
-function showStats() {
-  const total = tasks.length;
-  const completed = tasks.filter(t => t.done).length;
-  const pending = total - completed;
-  const today = new Date().toISOString().split('T')[0];
-  const overdue = tasks.filter(t => !t.done && t.due && t.due < today).length;
-  
-  const byCategory = {};
-  tasks.forEach(t => {
-    byCategory[t.category] = (byCategory[t.category] || 0) + 1;
-  });
-  
-  const byPriority = {};
-  tasks.forEach(t => {
-    byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;
-  });
-  
-  const recurringCount = tasks.filter(t => t.recurring && t.recurring !== 'none').length;
-  const withSubtasks = tasks.filter(t => t.subtasks && t.subtasks.length > 0).length;
-  
-  let analyticsHTML = `
-    <div style="padding:20px 0;">
-      
-      <div class="analytics-grid">
-        <div class="analytics-item">
-          <div class="analytics-title">📊 Overall Stats</div>
-          <div class="analytics-stat">
-            <span>Total Tasks</span>
-            <strong style="color:var(--primary);">${total}</strong>
-          </div>
-          <div class="analytics-stat">
-            <span>Completed ✅</span>
-            <strong style="color:var(--accent);">${completed}</strong>
-          </div>
-          <div class="analytics-stat">
-            <span>Pending ⏳</span>
-            <strong style="color:var(--warning);">${pending}</strong>
-          </div>
-          <div class="analytics-stat">
-            <span>Overdue ⚠️</span>
-            <strong style="color:var(--danger);">${overdue}</strong>
-          </div>
-        </div>
-        
-        <div class="analytics-item">
-          <div class="analytics-title">🎯 Advanced Stats</div>
-          <div class="analytics-stat">
-            <span>Recurring Tasks 🔄</span>
-            <strong style="color:var(--primary);">${recurringCount}</strong>
-          </div>
-          <div class="analytics-stat">
-            <span>With Subtasks ✓</span>
-            <strong style="color:var(--accent);">${withSubtasks}</strong>
-          </div>
-          <div class="analytics-stat">
-            <span>Completion %</span>
-            <strong style="color:var(--accent);">${total > 0 ? Math.round((completed/total)*100) : 0}%</strong>
-          </div>
-        </div>
-      </div>
-      
-      <div style="margin-top:20px;">
-        <strong style="font-size:14px;">📂 By Category</strong>
-        <div style="margin-top:10px;">
-          ${Object.entries(byCategory).map(([cat, count]) => `
-            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
-              <span>${CATEGORY_ICONS[cat]} ${cat}</span>
-              <span style="font-weight:bold;">${count}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div style="margin-top:20px;">
-        <strong style="font-size:14px;">🎯 By Priority</strong>
-        <div style="margin-top:10px;">
-          ${Object.entries(byPriority).map(([pri, count]) => `
-            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
-              <span class="tag tag-${pri}">${pri.toUpperCase()}</span>
-              <span style="font-weight:bold;">${count}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-    </div>
-  `;
-  
-  document.getElementById('analyticsContent').innerHTML = analyticsHTML;
-  document.getElementById('analyticsModal').classList.add('active');
-}
-
-function closeStats() {
-  document.getElementById('analyticsModal').classList.remove('active');
-}
-
-// ===== FEATURE 5: NOTIFICATIONS BADGE 🔔 =====
 
 function updateNotificationBadge() {
   const today = new Date().toISOString().split('T')[0];
@@ -1235,7 +1356,107 @@ function closeNotifications() {
   document.getElementById('notificationsModal').classList.remove('active');
 }
 
-// ===== UTILITY FUNCTIONS =====
+function showStats() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.done).length;
+  const pending = total - completed;
+  const today = new Date().toISOString().split('T')[0];
+  const overdue = tasks.filter(t => !t.done && t.due && t.due < today).length;
+  
+  const byCategory = {};
+  tasks.forEach(t => {
+    byCategory[t.category] = (byCategory[t.category] || 0) + 1;
+  });
+  
+  const byPriority = {};
+  tasks.forEach(t => {
+    byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;
+  });
+  
+  const recurringCount = tasks.filter(t => t.recurring && t.recurring !== 'none').length;
+  const withSubtasks = tasks.filter(t => t.subtasks && t.subtasks.length > 0).length;
+  const withTags = tasks.filter(t => t.tags && t.tags.length > 0).length;
+  const withReminders = tasks.filter(t => t.reminder).length;
+  
+  let analyticsHTML = `
+    <div style="padding:20px 0;">
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;">
+        <div style="background:var(--surface2);padding:15px;border-radius:12px;">
+          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">📊 Overall</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Total</span>
+            <strong style="color:var(--primary);">${total}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Completed ✅</span>
+            <strong style="color:var(--accent);">${completed}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Pending ⏳</span>
+            <strong style="color:var(--warning);">${pending}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Overdue ⚠️</span>
+            <strong style="color:var(--danger);">${overdue}</strong>
+          </div>
+        </div>
+        
+        <div style="background:var(--surface2);padding:15px;border-radius:12px;">
+          <div style="font-weight:bold;margin-bottom:10px;color:var(--accent);">🎯 Advanced</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Recurring 🔄</span>
+            <strong style="color:var(--primary);">${recurringCount}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Subtasks ✓</span>
+            <strong style="color:var(--accent);">${withSubtasks}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span>Tags 🏷️</span>
+            <strong style="color:var(--primary);">${withTags}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Reminders ⏰</span>
+            <strong style="color:var(--accent);">${withReminders}</strong>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;">
+        <strong style="font-size:14px;">📂 By Category</strong>
+        <div style="margin-top:10px;">
+          ${Object.entries(byCategory).map(([cat, count]) => `
+            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
+              <span>${CATEGORY_ICONS[cat]} ${cat}</span>
+              <span style="font-weight:bold;">${count}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;">
+        <strong style="font-size:14px;">🎯 By Priority</strong>
+        <div style="margin-top:10px;">
+          ${Object.entries(byPriority).map(([pri, count]) => `
+            <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);margin-bottom:8px;border-radius:8px;">
+              <span class="tag tag-${pri}">${pri.toUpperCase()}</span>
+              <span style="font-weight:bold;">${count}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+    </div>
+  `;
+  
+  document.getElementById('analyticsContent').innerHTML = analyticsHTML;
+  document.getElementById('analyticsModal').classList.add('active');
+}
+
+function closeStats() {
+  document.getElementById('analyticsModal').classList.remove('active');
+}
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -1263,6 +1484,16 @@ function renderTaskHTML(task, idx, today) {
     `;
   }
   
+  let tagsHTML = '';
+  if (task.tags && task.tags.length > 0) {
+    tagsHTML = task.tags.map(tag => `<span class="tag tag-custom">#${tag}</span>`).join('');
+  }
+  
+  let reminderHTML = '';
+  if (task.reminder) {
+    reminderHTML = `<span class="reminder-set">⏰ ${task.reminder}</span>`;
+  }
+  
   return `
     <div class="task ${task.done ? 'completed' : ''}">
       <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onchange="toggle(${idx})">
@@ -1274,18 +1505,20 @@ function renderTaskHTML(task, idx, today) {
           <span class="tag">${icon} ${task.category}</span>
           ${task.due ? `<span class="tag ${overdue ? 'tag-overdue':''}">${task.due}</span>` : ''}
           ${task.recurring && task.recurring !== 'none' ? `<span class="tag tag-recurring">🔄 ${task.recurring}</span>` : ''}
+          ${tagsHTML}
+          ${reminderHTML}
         </div>
         ${subtasksHTML}
         <div class="task-actions">
           <button onclick="editTask(${idx})">Edit</button>
+          <button onclick="cloneTask(${idx})">📋 Clone</button>
+          <button onclick="createTemplate(${idx})">📄 Template</button>
           <button class="btn-del" onclick="deleteTask(${idx})">Delete</button>
         </div>
       </div>
     </div>
   `;
 }
-
-// ===== SETTINGS =====
 
 function showSettings() {
   document.getElementById('settingsModal').classList.add('active');
@@ -1333,6 +1566,7 @@ function importData() {
         if (Array.isArray(imported)) {
           tasks = [...tasks, ...imported];
           localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+          saveToHistory();
           render();
           updateNotificationBadge();
           showToast('Tasks imported successfully!');
@@ -1355,20 +1589,23 @@ function clearAll() {
   }
   if (confirm('Delete ALL tasks? This cannot be undone!')) {
     tasks = [];
+    history = [];
+    historyIndex = -1;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     render();
     updateNotificationBadge();
+    updateHistoryButtons();
     closeSettings();
     showToast('All tasks cleared!');
   }
 }
 
-// ===== MAIN FUNCTIONS =====
-
 function init() {
   loadTheme();
+  saveToHistory();
   render();
   updateNotificationBadge();
+  updateHistoryButtons();
 }
 
 init();
@@ -1429,6 +1666,8 @@ function openAddModal() {
   editIndex = null;
   subtasksList = [];
   recurringType = 'none';
+  currentTags = [];
+  reminderTime = '';
   document.getElementById('addTitle').innerText = 'New Task';
   document.getElementById('taskName').value = '';
   document.getElementById('taskDesc').value = '';
@@ -1436,8 +1675,11 @@ function openAddModal() {
   document.getElementById('taskPriority').value = 'low';
   document.getElementById('taskDue').value = '';
   document.getElementById('taskRecurring').value = 'none';
+  document.getElementById('taskReminder').value = '';
   document.getElementById('subtaskInput').value = '';
+  document.getElementById('tagInput').value = '';
   renderSubtasks();
+  renderTags();
   document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
   document.querySelector('[data-recurring="none"]').classList.add('selected');
   document.getElementById('addModal').classList.add('active');
@@ -1471,6 +1713,8 @@ function saveTask() {
     due: dueDate,
     recurring: document.getElementById('taskRecurring').value,
     subtasks: subtasksList,
+    tags: currentTags,
+    reminder: document.getElementById('taskReminder').value,
     done: false,
     createdAt: new Date().toISOString()
   };
@@ -1483,6 +1727,7 @@ function saveTask() {
   }
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  saveToHistory();
   render();
   updateNotificationBadge();
   closeAddModal();
@@ -1492,6 +1737,7 @@ function saveTask() {
 function toggle(i) {
   tasks[i].done = !tasks[i].done;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  saveToHistory();
   render();
   updateNotificationBadge();
 }
@@ -1502,6 +1748,8 @@ function editTask(i) {
 
   subtasksList = JSON.parse(JSON.stringify(t.subtasks || []));
   recurringType = t.recurring || 'none';
+  currentTags = t.tags ? [...t.tags] : [];
+  reminderTime = t.reminder || '';
 
   document.getElementById('addTitle').innerText = 'Edit Task';
   document.getElementById('taskName').value = t.text;
@@ -1510,9 +1758,11 @@ function editTask(i) {
   document.getElementById('taskPriority').value = t.priority;
   document.getElementById('taskDue').value = t.due || '';
   document.getElementById('taskRecurring').value = t.recurring || 'none';
+  document.getElementById('taskReminder').value = t.reminder || '';
   document.getElementById('subtaskInput').value = '';
 
   renderSubtasks();
+  renderTags();
   document.querySelectorAll('.recurring-opt').forEach(opt => opt.classList.remove('selected'));
   document.querySelector(`[data-recurring="${t.recurring || 'none'}"]`).classList.add('selected');
 
@@ -1523,6 +1773,7 @@ function deleteTask(i) {
   if (confirm('Delete this task?')) {
     tasks.splice(i, 1);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    saveToHistory();
     render();
     updateNotificationBadge();
     showToast('Task Deleted! 🗑️');
@@ -1544,7 +1795,8 @@ function searchTasks(query) {
 
   var filtered = tasks.filter(task =>
     task.text.toLowerCase().includes(query) ||
-    (task.desc && task.desc.toLowerCase().includes(query))
+    (task.desc && task.desc.toLowerCase().includes(query)) ||
+    (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query)))
   );
 
   if (currentTab === 'pending') filtered = filtered.filter(t => !t.done);
@@ -1579,8 +1831,16 @@ function showToast(msg) {
   }, 2000);
 }
 
-// Close modals on Escape key
+// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'z') {
+    e.preventDefault();
+    undo();
+  }
+  if (e.ctrlKey && e.key === 'y') {
+    e.preventDefault();
+    redo();
+  }
   if (e.key === 'Escape') {
     closeAddModal();
     closeSettings();
